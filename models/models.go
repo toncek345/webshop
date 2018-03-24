@@ -2,19 +2,38 @@ package models
 
 import (
 	"database/sql"
+
+	_ "github.com/lib/pq"
 )
 
 var sqlDB *sql.DB
 
-// TODO: db connection hardcoded
-func init() {
-	// connStr := "user=pqgotest dbname=pqgotest sslmode=verify-full" // TODO
+func DbConnect(dbString string) (err error) {
+	sqlDB, err = sql.Open("postgres", dbString)
+	if err != nil {
+		return
+	}
+	return nil
+}
 
-	// var err error
-	// sqlDB, err = sql.Open("postgres", connStr)
-	// if err != nil {
-	// 	panic(err)
-	// }
+func InitDb() error {
+	if err := initNews(); err != nil {
+		return err
+	}
+
+	if err := initProduct(); err != nil {
+		return err
+	}
+
+	if err := initUser(); err != nil {
+		return err
+	}
+
+	if err := initAuth(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // getting global db object

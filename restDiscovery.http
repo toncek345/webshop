@@ -1,15 +1,83 @@
-# get all products
+# common vars
+:url = http://localhost:9000
 
-GET http://localhost:8080/products
-
-
-# create new product
-
-POST http://localhost:8080/products
+:HEADER = <<
 Content-Type: application/json
+x-auth: 248088a7-4c5f-43fe-a1ba-bf92879c4376
+#
+
+# auth
+## login
+POST :url/user/login
+content-type: application/json
 
 {
-	"Price": 100.25,
-	"Name": "čižme",
-	"Description": "zakon stvar za vrt"
+	"Username" : "admin",
+	"Password" : "admin"
+}
+
+## logout
+POST :url/user/logout
+:HEADER
+
+# get root
+GET :url/
+
+# products
+## get all products
+GET :url/product
+:HEADER
+
+## create new product
+POST :url/product
+:HEADER
+
+{
+	"Price" : 100,
+	"Name" : "čižme",
+	"Description" : "zakon stvar za vrt",
+	"ImagePath" : "http://www.publicdomainpictures.net/pictures/110000/nahled/cowboy-boots-1416282316H1J.jpg"
+}
+
+## delete product
+DELETE :url/product/3
+:HEADER
+
+## update product
+PUT :url/product/2
+:HEADER
+{
+	"Price" : 100,
+	"Name" : "čižme",
+	"Description" : "zakon stvar za vrt",
+	"ImagePath" : "http://www.publicdomainpictures.net/pictures/110000/nahled/cowboy-boots-1416282316H1J.jpg"
+}
+
+# news
+## get all news
+GET :url/news
+:HEADER
+
+## create news
+POST :url/news
+:HEADER
+
+{
+	"Header" : "naslov 1",
+	"Text" : "ovo je neki super kuul text o necemu totalno nebitnom",
+	"ImagePath" : "http://gdpulse.com/wp-content/uploads/2016/04/news-2.jpg"
+}
+
+## delete news
+DELETE :url/news/2
+:HEADER
+
+## update news
+PUT :url/news/3
+:HEADER
+
+{
+	"Header" : "naslov novi",
+	"Text" : "ovo je neki super kuul text o necemu totalno nebitnom ponovljeno",
+	"ImagePath" : "http://gdpulse.com/wp-content/uploads/2016/04/news-2.jpg"
 }
