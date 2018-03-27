@@ -1,6 +1,12 @@
-# small webshop
+# webshop
+
+small webshop
 
 ## running project
+
+make database `webshopGo`
+
+default database login uses default postgres superures (potgres with empty password)
 
 building with go 1.9.3
 
@@ -18,8 +24,6 @@ building with go 1.9.3
 
 ## todo
 
+* each product -> multiple images
 * frontend
-
-* database is currently mocked -> it will be upgraded to postgres db
-
 * always refactor :)
