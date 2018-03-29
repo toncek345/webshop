@@ -11,6 +11,7 @@ import (
 
 	"os"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/senko/clog"
 )
@@ -45,8 +46,11 @@ func main() {
 
 	addr := fmt.Sprintf("0.0.0.0:%s", strconv.FormatInt(*portNo, 10))
 	server := http.Server{
-		Addr:         addr,
-		Handler:      r,
+		Addr: addr,
+		Handler: handlers.CORS(
+			handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
+			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
+			handlers.AllowedOrigins([]string{"*"}))(r),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 	}
