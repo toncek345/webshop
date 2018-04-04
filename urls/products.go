@@ -9,24 +9,31 @@ import (
 )
 
 func productUrls(r *mux.Router) {
-	r.HandleFunc("/product", logRoute(
-		getProducts)).Methods("GET")
-
-	r.HandleFunc("/product", logRoute(
+	r.HandleFunc("/product/new",
 		authenticationRequired(
-			createProduct))).Methods("POST")
+			newProduct)).Methods("POST")
+
+	r.HandleFunc("/product",
+		getProducts).Methods("GET")
+
+	r.HandleFunc("/product",
+		authenticationRequired(
+			createProduct)).Methods("POST")
 
 	r.HandleFunc("/product/{id:[0-9]+}",
-		logRoute(
-			authenticationRequired(
-				productDelete))).Methods("DELETE")
+		authenticationRequired(
+			productDelete)).Methods("DELETE")
 
 	r.HandleFunc("/product/{id:[0-9]+}",
-		logRoute(
-			authenticationRequired(
-				productUpdate))).Methods("PUT")
+		authenticationRequired(
+			productUpdate)).Methods("PUT")
 
 }
+
+func newProduct(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func getProducts(w http.ResponseWriter, r *http.Request) {
 	products, err := models.GetAllProducts()
 	if err != nil {

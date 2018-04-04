@@ -9,20 +9,19 @@ import (
 )
 
 func newsUrls(r *mux.Router) {
-	r.HandleFunc("/news", logRoute(
-		getNews)).Methods("GET")
+	r.HandleFunc("/news", getNews).Methods("GET")
 
-	r.HandleFunc("/news", logRoute(
+	r.HandleFunc("/news",
 		authenticationRequired(
-			createNews))).Methods("POST")
+			createNews)).Methods("POST")
 
-	r.HandleFunc("/news/{id:[0-9]+}", logRoute(
+	r.HandleFunc("/news/{id:[0-9]+}",
 		authenticationRequired(
-			deleteNews))).Methods("DELETE")
+			deleteNews)).Methods("DELETE")
 
-	r.HandleFunc("/news/{id:[0-9]+}", logRoute(
+	r.HandleFunc("/news/{id:[0-9]+}",
 		authenticationRequired(
-			updateNews))).Methods("PUT")
+			updateNews)).Methods("PUT")
 }
 
 func getNews(w http.ResponseWriter, r *http.Request) {

@@ -22,24 +22,24 @@ import (
 )
 
 func SetUrls(r *mux.Router, staticFolder string) {
+	r.Use(logRoute)
 	newsUrls(r)
 	adminUrls(r)
 	productUrls(r)
 
 	// TODO serve static folder on /$staticFolder path
 
-	r.HandleFunc("/", logRoute(func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// serve static page
 		time.Sleep(4 * time.Second)
 		w.Write([]byte("helo homepage"))
-	})).Methods("GET")
+	}).Methods("GET")
 
 	r.HandleFunc("/admin",
-		logRoute(
-			authenticationRequired(
-				func(w http.ResponseWriter, r *http.Request) {
-					w.Write([]byte("hello admin page"))
-				}))).Methods("GET")
+		authenticationRequired(
+			func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("hello admin page"))
+			})).Methods("GET")
 }
 
 // Gets auth uuid from header which is sent in x-auth.

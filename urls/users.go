@@ -10,7 +10,7 @@ import (
 )
 
 func adminUrls(r *mux.Router) {
-	r.HandleFunc("/user/login", logRoute(
+	r.HandleFunc("/user/login",
 		func(w http.ResponseWriter, r *http.Request) {
 			var obj models.User
 
@@ -29,9 +29,9 @@ func adminUrls(r *mux.Router) {
 			}
 
 			respond(w, r, http.StatusOK, auth)
-		})).Methods("POST")
+		}).Methods("POST")
 
-	r.HandleFunc("/user/logout", logRoute(
+	r.HandleFunc("/user/logout",
 		func(w http.ResponseWriter, r *http.Request) {
 			token := getAuthHeader(r)
 			err := models.RemoveAuth(token)
@@ -41,5 +41,5 @@ func adminUrls(r *mux.Router) {
 			}
 
 			respond(w, r, http.StatusOK, nil)
-		})).Methods("POST")
+		}).Methods("POST")
 }

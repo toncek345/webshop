@@ -10,8 +10,8 @@ import (
 
 // Route logging middleware. Prints in console http version, method,
 // request path and duration.
-func logRoute(handle http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func logRoute(handle http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		initTime := time.Now()
 		handle.ServeHTTP(w, r)
 		endTime := time.Now()
@@ -22,12 +22,12 @@ func logRoute(handle http.HandlerFunc) http.HandlerFunc {
 			r.Method,
 			r.RequestURI,
 			duration.Nanoseconds()/int64(time.Millisecond))
-	}
+	})
 }
 
 // Middleware for checking if the client is authorized. Returns 403 if not.
 func authenticationRequired(handle http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authToken := getAuthHeader(r)
 
 		ok := models.IsAuth(authToken)
@@ -37,5 +37,5 @@ func authenticationRequired(handle http.HandlerFunc) http.HandlerFunc {
 		}
 
 		handle.ServeHTTP(w, r)
-	}
+	})
 }
