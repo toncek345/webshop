@@ -140,11 +140,10 @@ type Authenticate struct {
 func initAuth() (err error) {
 	sql := `CREATE TABLE public.authentification (
 	id serial NOT NULL PRIMARY KEY,
-    user_id int,
+    user_id int NOT NULL REFERENCES public.user (id) ON DELETE CASCADE,
     valid_until timestamp,
-    token uuid,
-    FOREIGN KEY (user_id) REFERENCES public.user(id)
-)`
+    token uuid
+	)`
 	_, err = sqlDB.Query(sql)
 	return
 }
@@ -191,7 +190,7 @@ func IsAuth(token string) bool {
 		return false
 	}
 
-	if time.Now().Second() > auth.ValidUntil.Second() {
+	if time.Now().Unix() > auth.ValidUntil.Unix() {
 		clog.Infof("Auth expired, id:%d, expiration:%s", auth.Id, auth.ValidUntil)
 		return false
 	}

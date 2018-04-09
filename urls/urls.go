@@ -2,8 +2,13 @@
 // 		/ [get]
 // 		/product [get, post]
 // 		/product/{id} [get, del, put]
+
+//		/product/{id}/image [post]
+//		/image/{id} [delete]
+
 // 		/news [get, post]
 // 		/news/{id} [get, del, put]
+
 // 		/admin [get]
 // 		/user/login [post]
 // 		/user/logout [post]
@@ -21,7 +26,10 @@ import (
 	"github.com/senko/clog"
 )
 
+var staticFolderPath string
+
 func SetUrls(r *mux.Router, staticFolder string) {
+	staticFolderPath = staticFolder
 	r.Use(logRoute)
 	newsUrls(r)
 	adminUrls(r)

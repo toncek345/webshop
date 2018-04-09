@@ -21,7 +21,7 @@ func main() {
 
 	// setup prog input
 	portNo := flag.Int64("port", 9000, "listening port number")
-	pathToStatic := flag.String("static", "static", "path to static folder")
+	pathToStatic := flag.String("static", "static/", "full path to static folder, add trailing /")
 	dbConnectionString := flag.String("dbString",
 		"user=postgres password=\"\" dbname=webshopGo sslmode=disable",
 		"database connection string, currenty only postgres supported")
@@ -55,5 +55,6 @@ func main() {
 		WriteTimeout: 15 * time.Second,
 	}
 
+	clog.Debug("webshop running")
 	clog.Errorf("%v", server.ListenAndServe())
 }
