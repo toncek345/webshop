@@ -85,7 +85,7 @@ func deleteImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	imgName, err = models.DeleteImage(imageId)
+	imgName, err := models.DeleteImage(imageId)
 	if err != nil {
 		clog.Warningf("%s", err)
 		respond(w, r, http.StatusInternalServerError, err)

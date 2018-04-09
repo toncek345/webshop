@@ -164,7 +164,7 @@ func CreateProduct(p Product) (int, error) {
 }
 
 func InsertImages(productId int, imageNames []string) error {
-	for i, name := range imageNames {
+	for _, name := range imageNames {
 		res, err := sqlDB.Exec(createImage, productId, name)
 		if err != nil {
 			return err
