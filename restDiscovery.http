@@ -3,7 +3,7 @@
 
 :HEADER = <<
 Content-Type: application/json
-x-auth: 248088a7-4c5f-43fe-a1ba-bf92879c4376
+x-auth: 040499ad-0377-4ec3-a6d9-9ac04ad3b9e6
 #
 
 # auth
@@ -33,10 +33,17 @@ POST :url/product
 :HEADER
 
 {
-	"Price" : 100,
-	"Name" : "čižme",
-	"Description" : "zakon stvar za vrt",
-	"ImagePath" : "http://www.publicdomainpictures.net/pictures/110000/nahled/cowboy-boots-1416282316H1J.jpg"
+  "Product": {
+    "Price": 1299,
+    "Name": "čižme",
+    "Description": "zakon stvar za vrt\n<h1>I za hodanje po kisi i grmljavini</h1>",
+    "ImagePath": "http://www.publicdomainpictures.net/pictures/110000/nahled/cowboy-boots-1416282316H1J.jpg"
+  },
+  "Images": [
+    "c3RyaW5nMQ==",
+    "c3RyaW5nMg==",
+    "aW1hZ2Uw"
+  ]
 }
 
 ## delete product
@@ -50,7 +57,6 @@ PUT :url/product/2
 	"Price" : 100,
 	"Name" : "čižme",
 	"Description" : "zakon stvar za vrt",
-	"ImagePath" : "http://www.publicdomainpictures.net/pictures/110000/nahled/cowboy-boots-1416282316H1J.jpg"
 }
 
 # news
@@ -63,9 +69,11 @@ POST :url/news
 :HEADER
 
 {
-	"Header" : "naslov 1",
-	"Text" : "ovo je neki super kuul text o necemu totalno nebitnom",
-	"ImagePath" : "http://gdpulse.com/wp-content/uploads/2016/04/news-2.jpg"
+  "News": {
+    "Header": "naslov 1",
+    "Text": "ovo je neki super kuul text o necemu totalno nebitnom"
+  },
+  "Image": "c3RyaW5nMQ=="
 }
 
 ## delete news
@@ -73,11 +81,16 @@ DELETE :url/news/2
 :HEADER
 
 ## update news
-PUT :url/news/3
+PUT :url/news/1
 :HEADER
 
 {
-	"Header" : "naslov novi",
-	"Text" : "ovo je neki super kuul text o necemu totalno nebitnom ponovljeno",
-	"ImagePath" : "http://gdpulse.com/wp-content/uploads/2016/04/news-2.jpg"
+  "News": {
+    "Header": "naslov 1",
+    "Text": "ovo je neki super kuul text o necemu totalno nebitnom"
+  },
+  "Image": "c3RyaW5nMQ=="
 }
+
+  #aW1hZ2Uw
+  #c3RyaW5nMQ==
