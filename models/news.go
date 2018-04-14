@@ -36,7 +36,7 @@ var (
 		"WHERE id=$4"
 
 	// delete
-	deleteNews = "DELETE FROM public.news WHERE id=$1"
+	deleteNews = "DELETE FROM public.news WHERE id=$1 RETURNING *"
 
 	// create
 	createNews = "INSERT INTO public.news (header, text, imagepath)" +
@@ -81,22 +81,12 @@ func GetNewsById(id int) (n News, err error) {
 	return
 }
 
-func DeleteNewsById(id int) error {
-	res, err := sqlDB.Exec(deleteNews, id)
-	if err != nil {
-		return err
-	}
+func DeleteNewsById(id int) (n News, err error) {
+	row := sqlDB.QueryRow(deleteNews, id)
 
-	rows, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
+	err = row.Scan(&n.Id, &n.Header, &n.Text, &n.ImagePath)
 
-	if rows == 0 {
-		return NoSuchIdNewsError
-	}
-
-	return nil
+	return
 }
 
 func UpdateNewsById(id int, n News) error {

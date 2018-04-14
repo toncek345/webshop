@@ -4,7 +4,13 @@ import (
 	"net/http"
 	"webshop/models"
 
+	"encoding/base64"
+	"fmt"
+	"io/ioutil"
+	"os"
+
 	"github.com/gorilla/mux"
+	"github.com/satori/go.uuid"
 	"github.com/senko/clog"
 )
 
@@ -35,7 +41,11 @@ func getNews(w http.ResponseWriter, r *http.Request) {
 }
 
 func createNews(w http.ResponseWriter, r *http.Request) {
-	var obj models.News
+	type newNews struct {
+		News  models.News
+		Image string // base64 encoded image
+	}
+	var obj newNews
 
 	err := decode(r, &obj)
 	if err != nil {
@@ -44,7 +54,24 @@ func createNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = models.CreateNews(obj)
+	if obj.Image == "" {
+		clog.Warningf("empty image for news")
+		respond(w, r, http.StatusBadRequest, "error: empty image")
+		return
+	}
+
+	binaryImage, err := base64.StdEncoding.DecodeString(obj.Image)
+	if err != nil {
+		clog.Warningf("%s", err)
+		respond(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	imageFilename := fmt.Sprintf("news-%s.jpg", uuid.Must(uuid.NewV4()).String())
+	ioutil.WriteFile(staticFolderPath+imageFilename, binaryImage, os.ModePerm)
+	obj.News.ImagePath = imageFilename
+
+	err = models.CreateNews(obj.News)
 	if err != nil {
 		clog.Warningf("%s", err)
 		respond(w, r, http.StatusInternalServerError, err)
@@ -62,18 +89,24 @@ func deleteNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = models.DeleteNewsById(id)
+	news, err := models.DeleteNewsById(id)
 	if err != nil {
 		clog.Warningf("%s", err)
 		respond(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
+	os.Remove(staticFolderPath + news.ImagePath)
+
 	respond(w, r, http.StatusOK, nil)
 }
 
 func updateNews(w http.ResponseWriter, r *http.Request) {
-	var n models.News
+	type newNews struct {
+		News  models.News
+		Image string // base64 encoded image
+	}
+	var obj newNews
 
 	id, err := parseMuxVarsInt(r, "id")
 	if err != nil {
@@ -82,12 +115,28 @@ func updateNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = decode(r, &n)
+	err = decode(r, &obj)
 	if err != nil {
 		clog.Warningf("%s", err)
 		respond(w, r, http.StatusBadRequest, err)
 		return
 	}
+
+	n, err := models.GetNewsById(id)
+	if err != nil {
+		clog.Warningf("%s", err)
+		respond(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	data, err := base64.StdEncoding.DecodeString(obj.Image)
+	if err != nil {
+		clog.Warningf("%s", err)
+		respond(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	ioutil.WriteFile(staticFolderPath+n.ImagePath, data, os.ModePerm)
 
 	err = models.UpdateNewsById(id, n)
 	if err != nil {
