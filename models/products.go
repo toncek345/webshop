@@ -151,16 +151,12 @@ func UpdateProductById(id int, p Product) error {
 	return nil
 }
 
-func CreateProduct(p Product) (int, error) {
+func CreateProduct(p Product) (productId int, err error) {
 	row := sqlDB.QueryRow(createProduct, p.Price, p.Name, p.Description)
 
-	var productId int
-	err := row.Scan(&productId)
-	if err != nil {
-		return productId, err
-	}
+	err = row.Scan(&productId)
 
-	return productId, nil
+	return
 }
 
 func InsertImages(productId int, imageNames []string) error {
