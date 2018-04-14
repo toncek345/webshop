@@ -36,6 +36,7 @@ func SetUrls(r *mux.Router, staticFolder string) {
 	productUrls(r)
 
 	// TODO serve static folder on /$staticFolder path
+	r.PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.Dir(staticFolderPath))))
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// serve static page
