@@ -20,7 +20,6 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/senko/clog"
@@ -35,20 +34,12 @@ func SetUrls(r *mux.Router, staticFolder string) {
 	adminUrls(r)
 	productUrls(r)
 
-	// TODO serve static folder on /$staticFolder path
-	r.PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.Dir(staticFolderPath))))
+	r.PathPrefix("/static").Handler(http.StripPrefix("/static",
+		http.FileServer(http.Dir(staticFolderPath))))
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// serve static page
-		time.Sleep(4 * time.Second)
-		w.Write([]byte("helo homepage"))
+		http.ServeFile(w, r, staticFolderPath+"index.html")
 	}).Methods("GET")
-
-	r.HandleFunc("/admin",
-		authenticationRequired(
-			func(w http.ResponseWriter, r *http.Request) {
-				w.Write([]byte("hello admin page"))
-			})).Methods("GET")
 }
 
 // Gets auth uuid from header which is sent in x-auth.
