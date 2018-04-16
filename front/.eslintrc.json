@@ -6,6 +6,7 @@
       "import"
   ],
   "rules": {
+      "max-len": 0,
       "react/jsx-filename-extension": 0,
       "no-unused-vars": 0,
       "react/prop-types": 0,
