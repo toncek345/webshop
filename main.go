@@ -38,6 +38,7 @@ func main() {
 		if err := models.InitDb(); err != nil {
 			panic(err)
 		}
+		clog.Info("db init completed")
 		os.Exit(0)
 	}
 
