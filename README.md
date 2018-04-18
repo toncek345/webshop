@@ -1,6 +1,6 @@
 # webshop
 
-small webshop
+small generic webshop
 
 ## running project
 
@@ -22,7 +22,11 @@ building with go 1.9.3
 ## deps that should be installed
 
 go
+
 govendor (optional)
+
 postgres (up & running)
+
 node
+
 npm
