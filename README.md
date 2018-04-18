@@ -6,24 +6,23 @@ small webshop
 
 make database `webshopGo`
 
-default database login uses default postgres superures (potgres with empty password)
+default database login uses default postgres superuser (potgres with empty password)
 
 building with go 1.9.3
 
-	go get github.com/gorilla/mux
-	go get github.com/senko/clog
-	go get github.com/lib/pq
-	go get github.com/satori/go.uuid
+	# fetch deps
+	govendor sync or make deps
 
-	go run main.go
-	
-	or
-	
-	go build
-	./webshop
+	# make front & back
+	make
 
-## todo
+	# run webshop
+	./webshop (serves on default port 9000 run --help for more options)
 
-* each product -> multiple images
-* frontend
-* always refactor :)
+## deps that should be installed
+
+go
+govendor (optional)
+postgres (up & running)
+node
+npm

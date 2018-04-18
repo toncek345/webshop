@@ -1,3 +1,6 @@
+DEPS = github.com/gorilla/handlers github.com/gorilla/mux \
+	github.com/lib/pq github.com/lib/pq/oid github.com/satori/go.uuid \
+	github.com/senko/clog golang.org/x/crypto/bcrypt golang.org/x/crypto/blowfish
 
 DIRECTORY = $(shell if [ ! -d "static" ]; then \
 		echo "folder does not exists, creating static"; \
@@ -23,6 +26,9 @@ frontend:
 	@echo "making front static useful"
 	mv static/static/js static/
 	rm -rf static/static
+
+deps:
+	go get $(DEPS)
 
 clean:
 	rm webshop
