@@ -23,7 +23,7 @@ func main() {
 	portNo := flag.Int64("port", 9000, "listening port number")
 	pathToStatic := flag.String("static", "./static/", "full path to static folder, add trailing /")
 	dbConnectionString := flag.String("dbString",
-		"user=postgres password=\"\" dbname=webshopGo sslmode=disable",
+		"user=postgres password=postgres dbname=webshopGo sslmode=disable",
 		"database connection string, currenty only postgres supported")
 	dbInit := flag.Bool("dbInit", false,
 		"set to true when db is done and tables need to be created, run only once")

@@ -211,7 +211,7 @@ func AuthUser(username, password string) (Authenticate, error) {
 		return Authenticate{}, UserNoMatch
 	}
 
-	token := uuid.Must(uuid.NewV4()).String()
+	token := uuid.NewV4().String()
 
 	a := Authenticate{
 		Token:      token,

@@ -64,7 +64,7 @@ func createImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filename := fmt.Sprintf("product-%s.jpg", uuid.Must(uuid.NewV4()).String())
+	filename := fmt.Sprintf("product-%s.jpg", uuid.NewV4().String())
 	ioutil.WriteFile(staticFolderPath+filename, binaryImage, os.ModePerm)
 
 	err = models.InsertImages(productId, []string{filename})
@@ -135,7 +135,7 @@ func createProduct(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			filename := fmt.Sprintf("product-%s.jpg", uuid.Must(uuid.NewV4()).String())
+			filename := fmt.Sprintf("product-%s.jpg", uuid.NewV4().String())
 			ioutil.WriteFile(staticFolderPath+filename, data, os.ModePerm)
 			imageNames = append(imageNames, filename)
 

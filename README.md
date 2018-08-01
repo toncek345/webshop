@@ -4,26 +4,27 @@ small generic webshop
 
 ## running project
 
-make database `webshopGo`
+create database `webshopGo`
 
-default database login uses default postgres superuser (potgres with empty password)
+default database login uses default postgres superuser with password postgres
+it can be changed through input parameters
 
-building with go 1.9.3
+building with go 1.9.7
 
 	# fetch deps
-	govendor sync or make deps
+	dep ensure
 
 	# make front & back
 	make
 
 	# run webshop
-	./webshop (serves on default port 9000 run --help for more options)
+	./webshop (serves on default port 9000 run with --help for more options)
 
 ## deps that should be installed
 
 go
 
-govendor (optional)
+dep (dependency management for go)
 
 postgres (up & running)
 

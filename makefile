@@ -17,13 +17,19 @@ backend:
 	go build
 
 frontend:
+	@echo "getting dependencies"
+	npm install
+
 	@echo "building frontend"
-	cd front; npm run build
+	cd front; npm run build; cd ..;
+
+	@echo "removing old frontend"
+	rm -rf static/*.json static/*.ico static/*.html static/*.js
 
 	@echo "copying front static"
 	cp -r front/build/* static/
 
-	@echo "making front static useful"
+	@echo "fixing getting of js through go"
 	mv static/static/js static/
 	rm -rf static/static
 
@@ -31,6 +37,6 @@ deps:
 	go get $(DEPS)
 
 clean:
-	rm webshop
-	rm static/*.json static/*.ico static/*.html static/*.js
+	rm -rf static/*.json static/*.ico static/*.html static/*.js
 	rm -rf static/js/
+	rm webshop

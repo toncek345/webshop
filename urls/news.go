@@ -67,7 +67,7 @@ func createNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	imageFilename := fmt.Sprintf("news-%s.jpg", uuid.Must(uuid.NewV4()).String())
+	imageFilename := fmt.Sprintf("news-%s.jpg", uuid.NewV4().String())
 	ioutil.WriteFile(staticFolderPath+imageFilename, binaryImage, os.ModePerm)
 	obj.News.ImagePath = imageFilename
 

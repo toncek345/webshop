@@ -125,7 +125,7 @@ class Products extends React.Component {
               <Card
                 key={item.Id}
                 itemId={item.Id}
-                imageUrl={item.Images && item.Images[0].Name}
+                imageUrl={item.Images && item.Images[0] && item.Images[0].Name}
                 heading={item.Name}
                 action={this.handleProductSelect}
                 price={item.Price}
