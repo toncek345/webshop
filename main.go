@@ -21,7 +21,7 @@ func main() {
 
 	// setup prog input
 	portNo := flag.Int64("port", 9000, "listening port number")
-	pathToStatic := flag.String("static", "./static/", "full path to static folder, add trailing /")
+	pathToStatic := flag.String("static", "./static/", "full path to static folder, add trailing / => static is currently used only for saving pictures")
 	dbConnectionString := flag.String("dbString",
 		"user=postgres password=postgres dbname=webshopGo sslmode=disable",
 		"database connection string, currenty only postgres supported")
