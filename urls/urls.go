@@ -34,12 +34,9 @@ func SetUrls(r *mux.Router, staticFolder string) {
 	adminUrls(r)
 	productUrls(r)
 
+	// static folder serves only images and other non front static files
 	r.PathPrefix("/static").Handler(http.StripPrefix("/static",
 		http.FileServer(http.Dir(staticFolderPath))))
-
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, staticFolderPath+"index.html")
-	}).Methods("GET")
 }
 
 // Gets auth uuid from header which is sent in x-auth.

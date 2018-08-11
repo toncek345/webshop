@@ -78,7 +78,6 @@ class Home extends React.Component {
       );
     }
 
-    console.log(`items in cart${this.props.itemsInCart}`);
     return (
       <div>
         <Navigation itemsInCart={this.props.itemsInCart} redirectTo={this.redirectTo} />

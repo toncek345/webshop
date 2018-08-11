@@ -1,6 +1,6 @@
 # webshop
 
-small generic webshop
+small generic webshop that is far from ideal go and needs major refactor :)
 
 ## running project
 
@@ -14,11 +14,14 @@ building with go 1.9.7
 	# fetch deps
 	dep ensure
 
-	# make front & back
-	make
+	# backend
+	go run main.go (see other args with --help)
 
-	# run webshop
-	./webshop (serves on default port 9000 run with --help for more options)
+	# frontend
+	cd front
+	`npm run start` or `yarn start`
+	# or build frontend and serve it
+	`npm run build` or `yarn build`
 
 ## deps that should be installed
 

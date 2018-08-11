@@ -10,7 +10,7 @@ const Navigation = ({
   <Navbar>
     <Navbar.Header>
       <Navbar.Brand>
-        <a href="#" onClick={() => redirectTo(Routes.home.path)}>Genericki webshop</a>
+        <a href="#" onClick={() => redirectTo(Routes.home.path)}>Generic webshop</a>
       </Navbar.Brand>
       <Navbar.Toggle />
     </Navbar.Header>
