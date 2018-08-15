@@ -20,23 +20,33 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/senko/clog"
 )
 
 var staticFolderPath string
 
-func SetUrls(r *mux.Router, staticFolder string) {
+func SetUrls(r chi.Router, staticFolder string) {
 	staticFolderPath = staticFolder
-	r.Use(logRoute)
-	newsUrls(r)
-	adminUrls(r)
-	productUrls(r)
+
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Use(middleware.Logger)
+		r.Use(middleware.Recoverer)
+		r.Use(middleware.Timeout(60 * time.Second))
+
+		newsUrls(r)
+		adminUrls(r)
+		productUrls(r)
+	})
 
 	// static folder serves only images and other non front static files
-	r.PathPrefix("/static").Handler(http.StripPrefix("/static",
-		http.FileServer(http.Dir(staticFolderPath))))
+	r.Get("/static/*", func(w http.ResponseWriter, r *http.Request) {
+		fs := http.StripPrefix("/static", http.FileServer(http.Dir(staticFolderPath)))
+		fs.ServeHTTP(w, r)
+	})
 }
 
 // Gets auth uuid from header which is sent in x-auth.
@@ -64,7 +74,7 @@ func respond(w http.ResponseWriter, r *http.Request, status int, data interface{
 
 	w.WriteHeader(status)
 	if _, err := io.Copy(w, &buf); err != nil {
-		clog.Errorf("error returning data", err)
+		clog.Errorf("error returning data: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -72,7 +82,7 @@ func respond(w http.ResponseWriter, r *http.Request, status int, data interface{
 
 // Parses from mux.vars[name] to integer.
 func parseMuxVarsInt(r *http.Request, name string) (int, error) {
-	id, err := strconv.ParseInt(mux.Vars(r)[name], 10, 32)
+	id, err := strconv.ParseInt(chi.URLParam(r, name), 10, 32)
 	if err != nil {
 		clog.Warningf("id parse error: %s", err)
 	}

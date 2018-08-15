@@ -10,35 +10,29 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 	"github.com/satori/go.uuid"
 	"github.com/senko/clog"
 )
 
-func productUrls(r *mux.Router) {
-	r.HandleFunc("/product",
-		getProducts).Methods("GET")
+func productUrls(r chi.Router) {
 
-	r.HandleFunc("/product",
-		authenticationRequired(
-			createProduct)).Methods("POST")
+	r.Route("/product", func(r chi.Router) {
+		r.Get("/", getProducts)
 
-	r.HandleFunc("/image/{id:[0-9]+}",
-		authenticationRequired(
-			createImage)).Methods("POST")
+		r.Group(func(r chi.Router) {
+			r.Use(authenticationRequired)
 
-	r.HandleFunc("/product/{id:[0-9]+}",
-		authenticationRequired(
-			productDelete)).Methods("DELETE")
+			r.Post("/", createProduct)
+			r.Delete("/{id:[0-9]+}", productDelete)
+			r.Put("/{id:[0-9]+}", productUpdate)
 
-	r.HandleFunc("/product/image/{id:[0-9]+}",
-		authenticationRequired(
-			deleteImage)).Methods("DELETE")
-
-	r.HandleFunc("/product/{id:[0-9]+}",
-		authenticationRequired(
-			productUpdate)).Methods("PUT")
-
+			r.Route("/image", func(r chi.Router) {
+				r.Post("/{id:[0-9]+}", createImage)
+				r.Delete("/{id:[0-9]+}", deleteImage)
+			})
+		})
+	})
 }
 
 func createImage(w http.ResponseWriter, r *http.Request) {

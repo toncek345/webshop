@@ -1,9 +1,9 @@
 # common vars
-:url = http://localhost:9000
+:url = http://127.0.0.1:9000/api/v1
 
 :HEADER = <<
 Content-Type: application/json
-x-auth: 040499ad-0377-4ec3-a6d9-9ac04ad3b9e6
+x-auth: 9ed37157-b8a7-46c1-89fb-1cc3b09d1a85
 #
 
 # auth
@@ -19,9 +19,6 @@ content-type: application/json
 ## logout
 POST :url/user/logout
 :HEADER
-
-# get root
-GET :url/
 
 # products
 ## get all products
@@ -47,7 +44,7 @@ POST :url/product
 }
 
 ## delete product
-DELETE :url/product/3
+DELETE :url/product/7
 :HEADER
 
 ## update product
@@ -70,14 +67,14 @@ POST :url/news
 
 {
   "News": {
-    "Header": "naslov 1",
+    "Header": "naslov 2",
     "Text": "ovo je neki super kuul text o necemu totalno nebitnom"
   },
   "Image": "c3RyaW5nMQ=="
 }
 
 ## delete news
-DELETE :url/news/2
+DELETE :url/news/3
 :HEADER
 
 ## update news

@@ -9,25 +9,23 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 	"github.com/satori/go.uuid"
 	"github.com/senko/clog"
 )
 
-func newsUrls(r *mux.Router) {
-	r.HandleFunc("/news", getNews).Methods("GET")
+func newsUrls(r chi.Router) {
+	r.Route("/news", func(r chi.Router) {
+		r.Get("/", getNews)
 
-	r.HandleFunc("/news",
-		authenticationRequired(
-			createNews)).Methods("POST")
+		r.Group(func(r chi.Router) {
+			r.Use(authenticationRequired)
 
-	r.HandleFunc("/news/{id:[0-9]+}",
-		authenticationRequired(
-			deleteNews)).Methods("DELETE")
-
-	r.HandleFunc("/news/{id:[0-9]+}",
-		authenticationRequired(
-			updateNews)).Methods("PUT")
+			r.Post("/", createNews)
+			r.Delete("/{id:[0-9]+}", deleteNews)
+			r.Put("/{id:[0-9]+}", updateNews)
+		})
+	})
 }
 
 func getNews(w http.ResponseWriter, r *http.Request) {

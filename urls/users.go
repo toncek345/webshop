@@ -5,12 +5,12 @@ import (
 
 	"webshop/models"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 	"github.com/senko/clog"
 )
 
-func adminUrls(r *mux.Router) {
-	r.HandleFunc("/user/login",
+func adminUrls(r chi.Router) {
+	r.Post("/user/login",
 		func(w http.ResponseWriter, r *http.Request) {
 			var obj models.User
 
@@ -29,9 +29,9 @@ func adminUrls(r *mux.Router) {
 			}
 
 			respond(w, r, http.StatusOK, auth)
-		}).Methods("POST")
+		})
 
-	r.HandleFunc("/user/logout",
+	r.Post("/user/logout",
 		func(w http.ResponseWriter, r *http.Request) {
 			token := getAuthHeader(r)
 			err := models.RemoveAuth(token)
@@ -41,5 +41,5 @@ func adminUrls(r *mux.Router) {
 			}
 
 			respond(w, r, http.StatusOK, nil)
-		}).Methods("POST")
+		})
 }

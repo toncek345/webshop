@@ -4,15 +4,13 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 	"webshop/models"
 	"webshop/urls"
 
-	"os"
-
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 	"github.com/senko/clog"
 )
 
@@ -42,16 +40,13 @@ func main() {
 		os.Exit(0)
 	}
 
-	r := mux.NewRouter()
+	r := chi.NewRouter()
 	urls.SetUrls(r, *pathToStatic)
 
 	addr := fmt.Sprintf("0.0.0.0:%s", strconv.FormatInt(*portNo, 10))
 	server := http.Server{
-		Addr: addr,
-		Handler: handlers.CORS(
-			handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
-			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
-			handlers.AllowedOrigins([]string{"*"}))(r),
+		Handler:      r,
+		Addr:         addr,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 	}
