@@ -11,7 +11,7 @@ const CartCard = ({ item, removeFromCartAction }) => (
     </Panel.Heading>
     <Panel.Body>
       <Col xs={3} md={3}>
-        <Image responsive src={`${ServerIp}/static/${item.Images[0].Name}`} style={{ height: 150 }} />
+        <Image responsive src={`${ServerIp}/api/v1/static/${item.Images[0].Name}`} style={{ height: 150 }} />
       </Col>
       <Col xs={6} md={6}>
         {item.Name}<br />

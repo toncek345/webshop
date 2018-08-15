@@ -32,20 +32,20 @@ var staticFolderPath string
 func SetUrls(r chi.Router, staticFolder string) {
 	staticFolderPath = staticFolder
 
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
-
 	r.Route("/api/v1", func(r chi.Router) {
+		r.Use(middleware.Logger)
+		r.Use(middleware.Recoverer)
+		r.Use(middleware.Timeout(60 * time.Second))
+
 		newsUrls(r)
 		adminUrls(r)
 		productUrls(r)
-	})
 
-	// static folder serves only images and other non front static files
-	r.Get("/static/*", func(w http.ResponseWriter, r *http.Request) {
-		fs := http.StripPrefix("/static", http.FileServer(http.Dir(staticFolderPath)))
-		fs.ServeHTTP(w, r)
+		// static folder serves only images and other non front static files
+		r.Get("/static/*", func(w http.ResponseWriter, r *http.Request) {
+			fs := http.StripPrefix("/api/v1/static", http.FileServer(http.Dir(staticFolderPath)))
+			fs.ServeHTTP(w, r)
+		})
 	})
 }
 

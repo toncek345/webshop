@@ -70,7 +70,7 @@ class Home extends React.Component {
             <Modal.Title>{this.state.selectedNews.Header}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Image src={`${ServerIp}/static/${this.state.selectedNews.ImagePath}`} responsive />
+            <Image src={`${ServerIp}/api/v1/static/${this.state.selectedNews.ImagePath}`} responsive />
             <hr />
             <p>{this.state.selectedNews.Text}</p>
           </Modal.Body>

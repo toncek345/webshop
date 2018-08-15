@@ -9,7 +9,7 @@ const Card = ({
 }) => (
   <Col xs={12} sm={4} md={3}>
     <Thumbnail
-      src={`${ServerIp}/static/${imageUrl}`}
+      src={`${ServerIp}/api/v1/static/${imageUrl}`}
       href="#"
       onClick={() => action(itemId)}
       rounded

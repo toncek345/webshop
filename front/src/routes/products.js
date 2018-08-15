@@ -80,7 +80,7 @@ class Products extends React.Component {
 
               {this.state.selectedProduct.Images.map(item => (
                 <Carousel.Item key={item.Id}>
-                  <Image src={`${ServerIp}/static/${item.Name}`} />
+                  <Image src={`${ServerIp}/api/v1/static/${item.Name}`} />
                 </Carousel.Item>
                   ))
               }
