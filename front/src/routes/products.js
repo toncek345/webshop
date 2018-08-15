@@ -82,7 +82,8 @@ class Products extends React.Component {
                 <Carousel.Item key={item.Id}>
                   <Image src={`${ServerIp}/static/${item.Name}`} />
                 </Carousel.Item>
-              ))}
+                  ))
+              }
 
             </Carousel>
             <Grid>

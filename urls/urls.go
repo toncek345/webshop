@@ -32,11 +32,11 @@ var staticFolderPath string
 func SetUrls(r chi.Router, staticFolder string) {
 	staticFolderPath = staticFolder
 
-	r.Route("/api/v1", func(r chi.Router) {
-		r.Use(middleware.Logger)
-		r.Use(middleware.Recoverer)
-		r.Use(middleware.Timeout(60 * time.Second))
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.Timeout(60 * time.Second))
 
+	r.Route("/api/v1", func(r chi.Router) {
 		newsUrls(r)
 		adminUrls(r)
 		productUrls(r)

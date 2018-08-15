@@ -2,8 +2,11 @@ import { ServerIp } from '../constants';
 
 export const getProducts = () => (dispatch) => {
   dispatch({ type: 'GET_PRODUCTS_PENDING' });
-  fetch(`${ServerIp}/product`, {
+  fetch(`${ServerIp}/api/v1/product`, {
     method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   }).then((resp) => {
     if (resp.status < 400) {
       resp.json().then((data) => {
