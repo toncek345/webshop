@@ -37,6 +37,10 @@ func SetUrls(r chi.Router, staticFolder string) {
 		r.Use(middleware.Recoverer)
 		r.Use(middleware.Timeout(60 * time.Second))
 
+		r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("all good"))
+		})
+
 		newsUrls(r)
 		adminUrls(r)
 		productUrls(r)
