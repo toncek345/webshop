@@ -72,7 +72,9 @@ class Home extends React.Component {
           <Modal.Body>
             <Image src={`${ServerIp}/api/v1/static/${this.state.selectedNews.ImagePath}`} responsive />
             <hr />
-            <p>{this.state.selectedNews.Text}</p>
+            <p>
+              <div dangerouslySetInnerHTML={{ __html: this.state.selectedNews.Text }} />
+            </p>
           </Modal.Body>
         </Modal>
       );
