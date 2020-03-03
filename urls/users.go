@@ -3,10 +3,9 @@ package urls
 import (
 	"net/http"
 
-	"webshop/models"
-
 	"github.com/go-chi/chi"
 	"github.com/senko/clog"
+	"github.com/toncek345/webshop/models"
 )
 
 func adminUrls(r chi.Router) {

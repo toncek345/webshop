@@ -2,7 +2,8 @@ package urls
 
 import (
 	"net/http"
-	"webshop/models"
+
+	"github.com/toncek345/webshop/models"
 )
 
 // Middleware for checking if the client is authorized. Returns 403 if not.

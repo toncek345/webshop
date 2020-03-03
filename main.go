@@ -7,12 +7,12 @@ import (
 	"os"
 	"strconv"
 	"time"
-	"webshop/models"
-	"webshop/urls"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/senko/clog"
+	"github.com/toncek345/webshop/models"
+	"github.com/toncek345/webshop/urls"
 )
 
 func main() {

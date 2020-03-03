@@ -1,5 +1,3 @@
 webshop
 webshop.exe
 vendor/
-Gopkg.lock
-front/package-lock.json

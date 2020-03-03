@@ -1,18 +1,16 @@
 package urls
 
 import (
-	"net/http"
-	"webshop/models"
-
 	"encoding/base64"
-
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 
 	"github.com/go-chi/chi"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 	"github.com/senko/clog"
+	"github.com/toncek345/webshop/models"
 )
 
 func productUrls(r chi.Router) {
