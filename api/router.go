@@ -12,7 +12,7 @@
 // 		/admin [get]
 // 		/user/login [post]
 // 		/user/logout [post]
-package web
+package api
 
 import (
 	"net/http"
