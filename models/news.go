@@ -5,60 +5,36 @@ import (
 	"errors"
 )
 
+type newsRepo struct {
+	db *sql.DB
+}
+
+func newNewsRepo(sqlDB *sql.DB) newsRepo {
+	return newsRepo{db: sqlDB}
+}
+
 type News struct {
-	Id        int
-	Header    string
-	Text      string
-	ImagePath string // path to image
+	ID        int    `db:"id"`
+	Header    string `db:"header"`
+	Text      string `db:"text"`
+	ImagePath string `db:"image_path"`
 }
 
-func initNews() (err error) {
-	sql := `CREATE TABLE public.news (
-		id serial NOT NULL PRIMARY KEY,
-		header varchar(250),
-		text text,
-		imagepath varchar(250)
-	)`
-
-	_, err = sqlDB.Exec(sql)
-	return
-}
-
-// sql-s
 var (
-	// select
-	getAllNews  = "SELECT * FROM public.news"
-	getNewsById = "SELECT * FROM public.news n WHERE n.id = $1"
-
-	// update
-	updateNews = "UPDATE public.news " +
-		"SET header=$1, text=$2, imagepath=$3" +
-		"WHERE id=$4"
-
-	// delete
-	deleteNews = "DELETE FROM public.news WHERE id=$1 RETURNING *"
-
-	// create
-	createNews = "INSERT INTO public.news (header, text, imagepath)" +
-		"VALUES ($1, $2, $3)"
+	ErrNewsNotCreatedError = errors.New("News not created")
+	ErrNoSuchIdNewsError   = errors.New("News not found by given ID")
 )
 
-// errors
-var (
-	NewsNotCreatedError = errors.New("News not created")
-	NoSuchIdNewsError   = errors.New("News not found by given ID")
-)
-
-func GetAllNews() (n []News, err error) {
+func (n *newsRepo) Get() (n []News, err error) {
 	var res *sql.Rows
-	res, err = sqlDB.Query(getAllNews)
+	res, err = n.db.Query("SELECT * FROM public.news")
 	if err != nil {
 		return
 	}
 
 	for res.Next() {
 		temp := News{}
-		err = res.Scan(&temp.Id, &temp.Header, &temp.Text,
+		err = res.Scan(&temp.ID, &temp.Header, &temp.Text,
 			&temp.ImagePath)
 		if err != nil {
 			return
@@ -70,10 +46,11 @@ func GetAllNews() (n []News, err error) {
 	return
 }
 
-func GetNewsById(id int) (n News, err error) {
+func (n *newsRepo) GetById(id int) (n News, err error) {
 	var res *sql.Row
-	res = sqlDB.QueryRow(getNewsById, id)
-	err = res.Scan(&n.Id, &n.Header, &n.Text, &n.ImagePath)
+	res = n.db.QueryRow("SELECT * FROM public.news n WHERE n.id = $1", id)
+
+	err = res.Scan(&n.ID, &n.Header, &n.Text, &n.ImagePath)
 	if err != nil {
 		return
 	}
@@ -81,16 +58,25 @@ func GetNewsById(id int) (n News, err error) {
 	return
 }
 
-func DeleteNewsById(id int) (n News, err error) {
-	row := sqlDB.QueryRow(deleteNews, id)
+func (n *newsRepo) DeleteById(id int) (n News, err error) {
+	row := n.db.QueryRow("DELETE FROM public.news WHERE id=$1 RETURNING *", id)
 
-	err = row.Scan(&n.Id, &n.Header, &n.Text, &n.ImagePath)
+	err = row.Scan(&n.ID, &n.Header, &n.Text, &n.ImagePath)
 
 	return
 }
 
-func UpdateNewsById(id int, n News) error {
-	res, err := sqlDB.Exec(updateNews, n.Header, n.Text, n.ImagePath, id)
+func (n *newsRepo) UpdateById(id int, n News) error {
+	res, err := n.db.Exec(
+		`
+		UPDATE public.news
+		SET header=$1, text=$2, imagepath=$3
+		WHERE id=$4
+		`,
+		n.Header,
+		n.Text,
+		n.ImagePath,
+		id)
 	if err != nil {
 		return err
 	}
@@ -101,14 +87,21 @@ func UpdateNewsById(id int, n News) error {
 	}
 
 	if rows == 0 {
-		return NoSuchIdNewsError
+		return ErrNoSuchIdNewsError
 	}
 
 	return nil
 }
 
-func CreateNews(n News) error {
-	res, err := sqlDB.Exec(createNews, n.Header, n.Text, n.ImagePath)
+func (n *newsRepo) CreateNews(n News) error {
+	res, err := n.db.Exec(
+		`
+		INSERT INTO public.news (header, text, imagepath)
+		VALUES ($1, $2, $3)
+		`,
+		n.Header,
+		n.Text,
+		n.ImagePath)
 	if err != nil {
 		return err
 	}
@@ -119,7 +112,7 @@ func CreateNews(n News) error {
 	}
 
 	if rows == 0 {
-		return NewsNotCreatedError
+		return ErrNewsNotCreatedError
 	}
 
 	return nil

@@ -5,65 +5,27 @@ import (
 	"errors"
 )
 
+type productsRepo struct {
+	db *sql.DB
+}
+
+func newProductsRepo(sqlDB *sql.DB) newsRepo {
+	return productsRepo{db: sqlDB}
+}
+
 type Images struct {
-	Id        int
-	ProductId int
-	Name      string
+	Id        int    `db:"id"`
+	ProductId int    `db:"product_id"`
+	Name      string `db:"name"`
 }
 
 type Product struct {
-	Id          int
-	Price       int
-	Name        string
-	Description string
+	Id          int    `db:"id"`
+	Price       int    `db:"price"`
+	Name        string `db:"name"`
+	Description string `db:"description"`
 	Images      []Images
 }
-
-func initProduct() (err error) {
-	sqlProduct := `CREATE TABLE public.product (
-	id serial NOT NULL PRIMARY KEY,
-    price integer,
-    name varchar(250),
-    description text
-	)`
-
-	_, err = sqlDB.Query(sqlProduct)
-	if err != nil {
-		return
-	}
-
-	sqlProductImages := `CREATE TABLE public.images (
-	id serial NOT NULL PRIMARY KEY,
-	product_id integer NOT NULL REFERENCES public.product(id) ON DELETE CASCADE,
-	name varchar(250)
-	)`
-	_, err = sqlDB.Query(sqlProductImages)
-
-	return
-}
-
-// sql-s
-var (
-	// select
-	getAllProducts      = "SELECT * FROM public.product"
-	getProductById      = "SELECT * FROM public.product p WHERE p.id = $1"
-	getAllProductImages = "SELECT * FROM public.images i WHERE i.product_id = $1"
-
-	// update
-	updateProduct = "UPDATE public.product " +
-		"SET price=$1, name=$2, description=$3, imagepath=$4 " +
-		"WHERE id = $5"
-
-	// delete
-	deleteProduct = "DELETE FROM public.product WHERE id=$1 RETURNING id"
-	deleteImage   = "DELETE FROM public.image WHERE id=$1 RETURNING name"
-
-	// create
-	createProduct = "INSERT INTO public.product (price, name, description) " +
-		"VALUES ($1, $2, $3) RETURNING id"
-	createImage = "INSERT INTO public.images (product_id, name) " +
-		"VALUES ($1, $2)"
-)
 
 var (
 	ProductNotCreatedError = errors.New("Product not created")
@@ -71,9 +33,9 @@ var (
 	ImageNotCreatedError   = errors.New("Image not created")
 )
 
-func GetAllProducts() (p []Product, err error) {
+func (p *productsRepo) Get() (p []Product, err error) {
 	var productRes *sql.Rows
-	productRes, err = sqlDB.Query(getAllProducts)
+	productRes, err = p.db.Query("SELECT * FROM public.product")
 	if err != nil {
 		return
 	}
@@ -90,7 +52,8 @@ func GetAllProducts() (p []Product, err error) {
 
 		// find all images for product
 		var imageRes *sql.Rows
-		imageRes, err = sqlDB.Query(getAllProductImages, tempProduct.Id)
+		imageRes, err = p.db.Query("SELECT * FROM public.images i WHERE i.product_id = $1",
+			tempProduct.Id)
 		if err != nil {
 			return
 		}
@@ -112,9 +75,9 @@ func GetAllProducts() (p []Product, err error) {
 	return
 }
 
-func GetProductById(id int) (p Product, err error) {
+func (p *productsRepo) GetById(id int) (p Product, err error) {
 	var res *sql.Row
-	res = sqlDB.QueryRow(getProductById, id)
+	res = p.db.QueryRow("SELECT * FROM public.product p WHERE p.id = $1", id)
 	err = res.Scan(&p.Id, &p.Price, &p.Name, &p.Description)
 	if err != nil {
 		return
@@ -123,8 +86,8 @@ func GetProductById(id int) (p Product, err error) {
 	return
 }
 
-func DeleteProductById(id int) (productId int, err error) {
-	res := sqlDB.QueryRow(deleteProduct, id)
+func (p *productsRepo) DeleteById(id int) (productId int, err error) {
+	res := p.db.QueryRow("DELETE FROM public.product WHERE id=$1 RETURNING id", id)
 	err = res.Scan(&productId)
 	if err != nil {
 		return
@@ -133,8 +96,17 @@ func DeleteProductById(id int) (productId int, err error) {
 	return
 }
 
-func UpdateProductById(id int, p Product) error {
-	res, err := sqlDB.Exec(updateProduct, p.Price, p.Name, p.Description, id)
+func (p *productsRepo) UpdateById(id int, p Product) error {
+	res, err := p.db.Exec(
+		`
+		UPDATE public.product
+		SET price=$1, name=$2, description=$3, imagepath=$4
+		WHERE id = $5
+		`,
+		p.Price,
+		p.Name,
+		p.Description,
+		id)
 	if err != nil {
 		return err
 	}
@@ -151,17 +123,30 @@ func UpdateProductById(id int, p Product) error {
 	return nil
 }
 
-func CreateProduct(p Product) (productId int, err error) {
-	row := sqlDB.QueryRow(createProduct, p.Price, p.Name, p.Description)
+func (p *productsRepo) Create(p Product) (productId int, err error) {
+	row := p.db.QueryRow(
+		`
+		INSERT INTO public.product (price, name, description)
+		VALUES ($1, $2, $3) RETURNING id
+		`,
+		p.Price,
+		p.Name,
+		p.Description)
 
 	err = row.Scan(&productId)
 
 	return
 }
 
-func InsertImages(productId int, imageNames []string) error {
+func (p *productsRepo) InsertImages(productId int, imageNames []string) error {
 	for _, name := range imageNames {
-		res, err := sqlDB.Exec(createImage, productId, name)
+		res, err := p.db.Exec(
+			`
+			INSERT INTO public.images (product_id, name)
+			VALUES ($1, $2)
+			`,
+			productId,
+			name)
 		if err != nil {
 			return err
 		}
@@ -179,8 +164,8 @@ func InsertImages(productId int, imageNames []string) error {
 	return nil
 }
 
-func DeleteImage(imageId int) (imageName string, err error) {
-	row := sqlDB.QueryRow(deleteImage, imageId)
+func (p *productsRepo) DeleteImage(imageId int) (imageName string, err error) {
+	row := p.db.QueryRow("DELETE FROM public.image WHERE id=$1 RETURNING name", imageId)
 
 	err = row.Scan(&imageName)
 	if err != nil {
