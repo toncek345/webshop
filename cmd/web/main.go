@@ -8,11 +8,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/cors"
 	_ "github.com/lib/pq"
 	"github.com/senko/clog"
-	"github.com/toncek345/webshop/urls"
+	"github.com/toncek345/webshop/models"
+	"github.com/toncek345/webshop/web"
 )
 
 var (
@@ -28,7 +27,7 @@ var (
 
 	dbConnectionString = flag.String(
 		"dbString",
-		"user=postgres password=postgres dbname=webshopGo sslmode=disable",
+		"user=postgres dbname=webshop sslmode=disable",
 		"database connection string, currenty only postgres supported")
 
 	// TODO: fixtures
@@ -42,11 +41,7 @@ func main() {
 	flag.Parse()
 	clog.Setup(clog.DEBUG, false)
 
-	sqlConn, err := sql.Open("postgres", dbConnectionString)
-	if err != nil {
-		panic(err)
-	}
-
+	// TODO: fixtures
 	// if *dbInit {
 	// 	if err := models.InitDb(); err != nil {
 	// 		panic(err)
@@ -55,22 +50,21 @@ func main() {
 	// 	os.Exit(0)
 	// }
 
-	r := chi.NewRouter()
-	// TODO: Handling cors should be only in development since react is with dev server
-	r.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: true,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
-	}).Handler)
+	sqlConn, err := sql.Open("postgres", dbConnectionString)
+	if err != nil {
+		panic(err)
+	}
 
-	urls.SetUrls(r, *pathToStatic)
+	models, err := models.New(sqlConn)
+	if err != nil {
+		panic(err)
+	}
+
+	webApp := web.New(models, *pathToStatic)
 
 	addr := fmt.Sprintf(":%s", strconv.FormatInt(*portNo, 10))
 	server := http.Server{
-		Handler:      r,
+		Handler:      webApp.Router(),
 		Addr:         addr,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
