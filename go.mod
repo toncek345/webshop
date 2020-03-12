@@ -3,7 +3,7 @@ module github.com/toncek345/webshop
 go 1.13
 
 require (
-	github.com/go-chi/chi v3.3.4+incompatible
+	github.com/go-chi/chi v4.0.3+incompatible
 	github.com/go-chi/cors v1.0.0
 	github.com/lib/pq v1.2.1-0.20191011153232-f91d3411e481
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
