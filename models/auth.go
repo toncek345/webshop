@@ -28,8 +28,8 @@ type Authenticate struct {
 
 // errors
 var (
-	errAuthNotCreated = errors.New("Authentification not created")
-	errAuthNotDeleted = errors.New("Authentification not deleted")
+	errAuthNotCreated = errors.New("Authentication not created")
+	errAuthNotDeleted = errors.New("Authentication not deleted")
 )
 
 func (ar *authRepo) IsAuth(token string) bool {
@@ -37,7 +37,7 @@ func (ar *authRepo) IsAuth(token string) bool {
 	res = ar.db.QueryRow(
 		`
 		SELECT id, user_id, TO_CHAR(valid_until, 'YYYY-MM-DD HH24:MI:SS') valid_until, token
-		FROM public.authentification WHERE token=$1
+		FROM public.authentication WHERE token=$1
 		`,
 		token)
 
@@ -89,7 +89,7 @@ func (ar *authRepo) AuthUser(user User, password string) (Authenticate, error) {
 func (ar *authRepo) createAuth(a Authenticate) error {
 	res, err := ar.db.Exec(
 		`
-		INSERT INTO public.authentification
+		INSERT INTO public.authentication
 		(user_id, valid_until, token)
 		VALUES ($1, $2, $3)"
 		`,
@@ -118,7 +118,7 @@ func (ar *authRepo) RemoveAuth(token string) error {
 	res := ar.db.QueryRow(
 		`
 		SELECT id, user_id, TO_CHAR(valid_until, 'YYYY-MM-DD HH24:MI:SS') valid_until, token
-		FROM public.authentification WHERE token=$1
+		FROM public.authentication WHERE token=$1
 		`,
 		token)
 
@@ -134,7 +134,7 @@ func (ar *authRepo) RemoveAuth(token string) error {
 	// remove auth
 	resRows, err := ar.db.Exec(
 		`
-		UPDATE public.authentification
+		UPDATE public.authentication
 		SET valid_until=$1
 		WHERE id=$2
 		`,
