@@ -50,7 +50,7 @@ func main() {
 	// 	os.Exit(0)
 	// }
 
-	sqlConn, err := sql.Open("postgres", dbConnectionString)
+	sqlConn, err := sql.Open("postgres", *dbConnectionString)
 	if err != nil {
 		panic(err)
 	}

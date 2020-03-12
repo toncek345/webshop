@@ -14,7 +14,7 @@ type Models struct {
 
 func New(sqlDB *sql.DB) (Models, error) {
 	if sqlDB == nil {
-		return nil, fmt.Errorf("models: models init failed sqldb is nil")
+		return Models{}, fmt.Errorf("models: models init failed sqldb is nil")
 	}
 
 	return Models{

@@ -66,7 +66,7 @@ func (app *App) createNews(w http.ResponseWriter, r *http.Request) {
 	}
 
 	imageFilename := fmt.Sprintf("news-%s.jpg", uuid.NewV4().String())
-	ioutil.WriteFile(staticFolderPath+imageFilename, binaryImage, os.ModePerm)
+	ioutil.WriteFile(app.staticFolderPath+imageFilename, binaryImage, os.ModePerm)
 	obj.News.ImagePath = imageFilename
 
 	err = app.models.News.CreateNews(obj.News)
@@ -94,7 +94,7 @@ func (app *App) deleteNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	os.Remove(staticFolderPath + news.ImagePath)
+	os.Remove(app.staticFolderPath + news.ImagePath)
 
 	app.JSONRespond(w, r, http.StatusOK, nil)
 }
@@ -113,7 +113,7 @@ func (app *App) updateNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = JSONDecode(r, &obj)
+	err = app.JSONDecode(r, &obj)
 	if err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusBadRequest, err)
@@ -134,7 +134,7 @@ func (app *App) updateNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ioutil.WriteFile(staticFolderPath+n.ImagePath, data, os.ModePerm)
+	ioutil.WriteFile(app.staticFolderPath+n.ImagePath, data, os.ModePerm)
 
 	err = app.models.News.UpdateById(id, n)
 	if err != nil {

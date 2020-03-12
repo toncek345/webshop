@@ -15,7 +15,7 @@ type authRepo struct {
 	db *sql.DB
 }
 
-func newAuthRepo(sqlDB *sql.DB) newsRepo {
+func newAuthRepo(sqlDB *sql.DB) authRepo {
 	return authRepo{db: sqlDB}
 }
 
@@ -32,9 +32,9 @@ var (
 	errAuthNotDeleted = errors.New("Authentification not deleted")
 )
 
-func (a *authRepo) IsAuth(token string) bool {
+func (ar *authRepo) IsAuth(token string) bool {
 	var res *sql.Row
-	res = a.db.QueryRow(
+	res = ar.db.QueryRow(
 		`
 		SELECT id, user_id, TO_CHAR(valid_until, 'YYYY-MM-DD HH24:MI:SS') valid_until, token
 		FROM public.authentification WHERE token=$1
@@ -64,9 +64,8 @@ func (a *authRepo) IsAuth(token string) bool {
 	return true
 }
 
-func (a *authRepo) AuthUser(user User, password string) (Authenticate, error) {
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if err != nil {
+func (ar *authRepo) AuthUser(user User, password string) (Authenticate, error) {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		clog.Debug("pssst password doesn't match")
 		return Authenticate{}, UserNoMatch
 	}
@@ -78,8 +77,8 @@ func (a *authRepo) AuthUser(user User, password string) (Authenticate, error) {
 		UserId:     user.Id,
 		ValidUntil: time.Now().Add(time.Hour * 24),
 	}
-	err = createAuth(a)
-	if err != nil {
+
+	if err := ar.createAuth(a); err != nil {
 		clog.Warningf("Auth not created: %s", err)
 		return Authenticate{}, err
 	}
@@ -87,8 +86,8 @@ func (a *authRepo) AuthUser(user User, password string) (Authenticate, error) {
 	return a, nil
 }
 
-func (a *authRepo) createAuth(a Authenticate) error {
-	res, err := a.db.Exec(
+func (ar *authRepo) createAuth(a Authenticate) error {
+	res, err := ar.db.Exec(
 		`
 		INSERT INTO public.authentification
 		(user_id, valid_until, token)
@@ -113,10 +112,10 @@ func (a *authRepo) createAuth(a Authenticate) error {
 	return nil
 }
 
-func (a *authRepo) RemoveAuth(token string) error {
+func (ar *authRepo) RemoveAuth(token string) error {
 	auth := Authenticate{}
 
-	res := a.db.QueryRow(
+	res := ar.db.QueryRow(
 		`
 		SELECT id, user_id, TO_CHAR(valid_until, 'YYYY-MM-DD HH24:MI:SS') valid_until, token
 		FROM public.authentification WHERE token=$1
@@ -133,7 +132,7 @@ func (a *authRepo) RemoveAuth(token string) error {
 	auth.ValidUntil = time.Now()
 
 	// remove auth
-	resRows, err := a.db.Exec(
+	resRows, err := ar.db.Exec(
 		`
 		UPDATE public.authentification
 		SET valid_until=$1

@@ -57,9 +57,9 @@ func (app *App) createImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filename := fmt.Sprintf("product-%s.jpg", uuid.NewV4().String())
-	ioutil.WriteFile(staticFolderPath+filename, binaryImage, os.ModePerm)
+	ioutil.WriteFile(app.staticFolderPath+filename, binaryImage, os.ModePerm)
 
-	err = models.InsertImages(productId, []string{filename})
+	err = app.models.Products.InsertImages(productId, []string{filename})
 	if err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
@@ -73,25 +73,25 @@ func (app *App) deleteImage(w http.ResponseWriter, r *http.Request) {
 	imageId, err := parseUrlVarsInt(r, "id")
 	if err != nil {
 		clog.Warningf("%s", err)
-		JSONRespond(w, r, http.StatusBadRequest, err)
+		app.JSONRespond(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	imgName, err := models.DeleteImage(imageId)
+	imgName, err := app.models.Products.DeleteImage(imageId)
 	if err != nil {
 		clog.Warningf("%s", err)
-		JSONRespond(w, r, http.StatusInternalServerError, err)
+		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	err = os.Remove(staticFolderPath + imgName)
+	err = os.Remove(app.staticFolderPath + imgName)
 	if err != nil {
 		clog.Warningf("%s", err)
-		JSONRespond(w, r, http.StatusInternalServerError, err)
+		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	JSONRespond(w, r, http.StatusOK, nil)
+	app.JSONRespond(w, r, http.StatusOK, nil)
 }
 
 func (app *App) createProduct(w http.ResponseWriter, r *http.Request) {
@@ -128,7 +128,7 @@ func (app *App) createProduct(w http.ResponseWriter, r *http.Request) {
 			}
 
 			filename := fmt.Sprintf("product-%s.jpg", uuid.NewV4().String())
-			ioutil.WriteFile(staticFolderPath+filename, data, os.ModePerm)
+			ioutil.WriteFile(app.staticFolderPath+filename, data, os.ModePerm)
 			imageNames = append(imageNames, filename)
 
 			binaryImages[i] = data

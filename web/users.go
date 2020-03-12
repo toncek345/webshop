@@ -13,14 +13,21 @@ func (app *App) adminRouter(r chi.Router) {
 		func(w http.ResponseWriter, r *http.Request) {
 			var obj models.User
 
-			err := JSONDecode(r, &obj)
+			err := app.JSONDecode(r, &obj)
 			if err != nil {
 				clog.Warningf("%s", err)
 				app.JSONRespond(w, r, http.StatusBadRequest, err)
 				return
 			}
 
-			auth, err := app.models.Auth.AuthUser(obj.Username, obj.Password)
+			user, err := app.models.Users.GetByUsername(obj.Username)
+			if err != nil {
+				clog.Warningf("%s", err)
+				app.JSONRespond(w, r, http.StatusNotFound, "finding user error")
+				return
+			}
+
+			auth, err := app.models.Auth.AuthUser(user, obj.Password)
 			if err != nil {
 				clog.Warningf("%s", err)
 				app.JSONRespond(w, r, http.StatusBadRequest, err)

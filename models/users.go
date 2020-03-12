@@ -9,8 +9,8 @@ type usersRepo struct {
 	db *sql.DB
 }
 
-func newUserRepo(sqlDB *sql.DB) newsRepo {
-	return authRepo{db: sqlDB}
+func newUserRepo(sqlDB *sql.DB) usersRepo {
+	return usersRepo{db: sqlDB}
 }
 
 // errors
@@ -21,39 +21,34 @@ var (
 	UserNotCreatedError   = errors.New("User not created")
 )
 
-// TODO: remove after fixing handlers
-// getUserById                  = "SELECT * FROM public.user WHERE id=$1"
-
 type User struct {
 	Id       int    `db:"id"`
 	Username string `db:"username"`
 	Password string `db:"password"`
 }
 
-// TODO: remove after fixing handlers
-// func findUser(username string) (u User, err error) {
-// 	var res *sql.Row
-// 	res = sqlDB.QueryRow(getUserByPasswordAndUsername, username)
-// 	err = res.Scan(&u.Id, &u.Username, &u.Password)
-// 	if err != nil {
-// 		if err == sql.ErrNoRows {
-// 			err = UserNoMatch
-// 			return
-// 		}
-// 		return
-// 	}
+func (ur *usersRepo) GetByUsername(username string) (u User, err error) {
+	var res *sql.Row
+	res = ur.db.QueryRow("SELECT * FROM public.user WHERE username = $1", username)
+	err = res.Scan(&u.Id, &u.Username, &u.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = UserNoMatch
+			return
+		}
+		return
+	}
 
-// 	return
-// }
+	return
+}
 
-func UpdateUser(id int, u User) error {
-	res, err := sqlDB.Exec(
+func (ur *usersRepo) UpdateUser(id int, u User) error {
+	res, err := ur.db.Exec(
 		`
 		UPDATE public.user
 		SET username=$1, public.user.password=$2
 		WHERE id=$3
 		`,
-		updateUser,
 		u.Username,
 		u.Password,
 		id)
@@ -73,8 +68,8 @@ func UpdateUser(id int, u User) error {
 	return nil
 }
 
-func CreateUser(u User) error {
-	res, err := sqlDB.Exec(
+func (ur *usersRepo) CreateUser(u User) error {
+	res, err := ur.db.Exec(
 		`INSERT INTO public.user (username, password)
 		VALUES ($1, $2)`,
 		u.Username,

@@ -18,7 +18,7 @@ func (app *App) getAuthHeader(r *http.Request) string {
 
 // JSONDecode decodes given request to object that is given.
 // Call this function with pointer to object that needs to be decoded.
-func JSONDecode(r *http.Request, v interface{}) error {
+func (app *App) JSONDecode(r *http.Request, v interface{}) error {
 	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
 		return err
 	}
