@@ -25,38 +25,6 @@ func New(sqlDB *sql.DB) (Models, error) {
 	}, nil
 }
 
-// func InitDb() error {
-// if err := initNews(); err != nil {
-// 		sql := `CREATE TABLE public.news (
-// 	id serial NOT NULL PRIMARY KEY,
-// 	header text,
-// 	text text,
-// 	imagepath text
-// )`
-
-// if err := initProduct(); err != nil {
-// 		sqlProduct := `CREATE TABLE public.product (
-// id serial NOT NULL PRIMARY KEY,
-//   price integer,
-//   name text,
-//   description text
-// )`
-
-// sqlProductImages := `CREATE TABLE public.images (
-// id serial NOT NULL PRIMARY KEY,
-// product_id integer NOT NULL REFERENCES public.product(id) ON DELETE CASCADE,
-// name text
-// )`
-// _, err = sqlDB.Query(sqlProductImages)
-
-// if err := initUser(); err != nil {
-// TODO: admin creaton belongs to fixtures
-// 			sql := `CREATE TABLE public.user (
-// 	id serial NOT NULL PRIMARY KEY,
-//     username text,
-//     password text
-// )`
-
 // 	// creating admin
 // 	var hash []byte
 // 	hash, err = bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
@@ -77,18 +45,4 @@ func New(sqlDB *sql.DB) (Models, error) {
 // 	}
 
 // 	return err
-// }
-
-// if err := initAuth(); err != nil {
-// 		sql := `CREATE TABLE public.authentication (
-// id serial NOT NULL PRIMARY KEY,
-//   user_id int NOT NULL REFERENCES public.user (id) ON DELETE CASCADE,
-//   valid_until timestamp,
-//   token uuid
-// )`
-// _, err = sqlDB.Query(sql)
-// return err
-// }
-
-// 	return nil
 // }
