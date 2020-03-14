@@ -1,34 +1,24 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
-	_ "github.com/lib/pq"
 	"github.com/senko/clog"
+	"github.com/toncek345/webshop/api"
+	"github.com/toncek345/webshop/config"
 	"github.com/toncek345/webshop/models"
-	"github.com/toncek345/webshop/web"
 )
 
 var (
-	portNo = flag.Int64(
-		"port",
-		9000,
-		"listening port number")
-
-	pathToStatic = flag.String(
-		"static",
-		"./static/",
-		"full path to static folder, add trailing / => static is currently used only for saving pictures")
-
-	dbConnectionString = flag.String(
-		"dbString",
-		"user=postgres dbname=webshop sslmode=disable",
-		"database connection string, currenty only postgres supported")
+	environment = flag.String(
+		"env",
+		"development",
+		"development, production running mode",
+	)
 
 	// TODO: fixtures
 	// dbInit = flag.Bool(
@@ -50,19 +40,32 @@ func main() {
 	// 	os.Exit(0)
 	// }
 
-	sqlConn, err := sql.Open("postgres", *dbConnectionString)
+	var env config.Environment
+	switch *environment {
+	case "development":
+		env = config.DevEnv
+	case "production":
+		env = config.ProdEnv
+	}
+
+	config, err := config.New(env)
 	if err != nil {
 		panic(err)
 	}
 
-	models, err := models.New(sqlConn)
+	sqlConn, err := config.SqlxConn()
 	if err != nil {
 		panic(err)
 	}
 
-	webApp := web.New(models, *pathToStatic)
+	models, err := models.New(sqlConn.DB)
+	if err != nil {
+		panic(err)
+	}
 
-	addr := fmt.Sprintf(":%s", strconv.FormatInt(*portNo, 10))
+	webApp := api.New(models, config.StaticPath)
+
+	addr := fmt.Sprintf(":%s", strconv.FormatInt(config.WebPort, 10))
 	server := http.Server{
 		Handler:      webApp.Router(),
 		Addr:         addr,

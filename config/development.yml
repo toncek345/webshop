@@ -1,0 +1,9 @@
+static_path: ./static
+web_port: 9000
+
+postgres:
+  database: webshop
+  host: localhost
+  port: 5432
+  user: postgres
+  password: ""
