@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/lib/pq"
@@ -67,14 +68,14 @@ func (ar *authRepo) IsAuth(token string) bool {
 func (ar *authRepo) AuthUser(user User, password string) (Authenticate, error) {
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		clog.Debug("pssst password doesn't match")
-		return Authenticate{}, UserNoMatch
+		return Authenticate{}, fmt.Errorf("models/auth: user doesn't match")
 	}
 
 	token := uuid.NewV4().String()
 
 	a := Authenticate{
 		Token:      token,
-		UserId:     user.Id,
+		UserId:     user.ID,
 		ValidUntil: time.Now().Add(time.Hour * 24),
 	}
 

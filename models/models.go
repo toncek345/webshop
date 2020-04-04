@@ -21,7 +21,7 @@ func New(sqlDB *sqlx.DB) (Models, error) {
 	return Models{
 		News:     newNewsRepo(sqlDB),
 		Products: newProductsRepo(sqlDB),
-		Users:    newUserRepo(sqlDB.DB),
+		Users:    newUserRepo(sqlDB),
 		Auth:     newAuthRepo(sqlDB.DB),
 	}, nil
 }
