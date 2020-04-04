@@ -87,15 +87,20 @@ func (app *App) deleteNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	news, err := app.models.News.DeleteById(id)
+	news, err := app.models.News.GetByID(id)
 	if err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	os.Remove(app.staticFolderPath + news.ImagePath)
+	if err := app.models.News.DeleteByID(id); err != nil {
+		clog.Warningf("%s", err)
+		app.JSONRespond(w, r, http.StatusInternalServerError, err)
+		return
+	}
 
+	os.Remove(app.staticFolderPath + news.ImagePath)
 	app.JSONRespond(w, r, http.StatusOK, nil)
 }
 
@@ -120,7 +125,7 @@ func (app *App) updateNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	n, err := app.models.News.GetById(id)
+	n, err := app.models.News.GetByID(id)
 	if err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
@@ -136,7 +141,7 @@ func (app *App) updateNews(w http.ResponseWriter, r *http.Request) {
 
 	ioutil.WriteFile(app.staticFolderPath+n.ImagePath, data, os.ModePerm)
 
-	err = app.models.News.UpdateById(id, n)
+	err = app.models.News.UpdateByID(id, n)
 	if err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)

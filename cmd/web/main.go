@@ -58,7 +58,7 @@ func main() {
 		panic(err)
 	}
 
-	models, err := models.New(sqlConn.DB)
+	models, err := models.New(sqlConn)
 	if err != nil {
 		panic(err)
 	}

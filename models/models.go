@@ -1,8 +1,9 @@
 package models
 
 import (
-	"database/sql"
 	"fmt"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type Models struct {
@@ -12,16 +13,16 @@ type Models struct {
 	Auth     authRepo
 }
 
-func New(sqlDB *sql.DB) (Models, error) {
+func New(sqlDB *sqlx.DB) (Models, error) {
 	if sqlDB == nil {
 		return Models{}, fmt.Errorf("models: models init failed sqldb is nil")
 	}
 
 	return Models{
 		News:     newNewsRepo(sqlDB),
-		Products: newProductsRepo(sqlDB),
-		Users:    newUserRepo(sqlDB),
-		Auth:     newAuthRepo(sqlDB),
+		Products: newProductsRepo(sqlDB.DB),
+		Users:    newUserRepo(sqlDB.DB),
+		Auth:     newAuthRepo(sqlDB.DB),
 	}, nil
 }
 
