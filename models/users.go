@@ -24,7 +24,7 @@ func (ur *usersRepo) GetByUsername(username string) (User, error) {
 	var u User
 	if err := ur.db.Get(
 		&u,
-		"SELECT * FROM user WHERE username = $1",
+		"SELECT * FROM users WHERE username = $1",
 		username); err != nil {
 		return u, fmt.Errorf("models/users: error getting user by username: %w", err)
 	}
@@ -35,7 +35,7 @@ func (ur *usersRepo) GetByUsername(username string) (User, error) {
 func (ur *usersRepo) UpdateUser(id int, u User) error {
 	if _, err := ur.db.Exec(
 		`
-		UPDATE public.user
+		UPDATE users
 		SET username=$1, public.user.password=$2
 		WHERE id=$3
 		`,
@@ -50,7 +50,7 @@ func (ur *usersRepo) UpdateUser(id int, u User) error {
 
 func (ur *usersRepo) CreateUser(u User) error {
 	if _, err := ur.db.Exec(
-		`INSERT INTO public.user (username, password)
+		`INSERT INTO users (username, password)
 		VALUES ($1, $2)`,
 		u.Username,
 		u.Password); err != nil {

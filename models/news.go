@@ -15,10 +15,10 @@ func newNewsRepo(sqlDB *sqlx.DB) newsRepo {
 }
 
 type News struct {
-	ID        int    `db:"id"`
-	Header    string `db:"header"`
-	Text      string `db:"text"`
-	ImagePath string `db:"image_path"`
+	ID       int    `db:"id"`
+	Header   string `db:"header"`
+	Text     string `db:"text"`
+	ImageKey string `db:"image_key"`
 }
 
 func (nr *newsRepo) Get() ([]News, error) {
@@ -56,7 +56,7 @@ func (nr *newsRepo) DeleteByID(id int) error {
 func (nr *newsRepo) UpdateByID(id int, n News) error {
 	if _, err := nr.db.Exec(
 		`UPDATE news SET header = $1, text = $2, imagepath = $3`,
-		n.Header, n.Text, n.ImagePath, id); err != nil {
+		n.Header, n.Text, n.ImageKey, id); err != nil {
 		return fmt.Errorf("models/news: error updating news: %w", err)
 	}
 
@@ -71,7 +71,7 @@ func (nr *newsRepo) CreateNews(n News) error {
 		`,
 		n.Header,
 		n.Text,
-		n.ImagePath); err != nil {
+		n.ImageKey); err != nil {
 		return fmt.Errorf("models/news: error creating news: %w", err)
 	}
 

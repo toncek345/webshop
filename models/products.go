@@ -17,7 +17,7 @@ func newProductsRepo(sqlDB *sqlx.DB) productsRepo {
 type Images struct {
 	ID        int    `db:"id"`
 	ProductID int    `db:"product_id"`
-	Name      string `db:"name"`
+	Key       string `db:"key"`
 }
 
 type Product struct {
@@ -32,7 +32,7 @@ func (pr *productsRepo) Get() ([]Product, error) {
 	var products []Product
 	if err := pr.db.Select(
 		&products,
-		"SELECT * FROM product"); err != nil {
+		"SELECT * FROM products"); err != nil {
 		return nil, fmt.Errorf("models/products: error getting products: %w", err)
 	}
 
@@ -63,7 +63,7 @@ func (pr *productsRepo) Get() ([]Product, error) {
 
 func (pr *productsRepo) GetByID(id int) (Product, error) {
 	var p Product
-	if err := pr.db.Get(&p, "SELECT * FROM product where id = $1", id); err != nil {
+	if err := pr.db.Get(&p, "SELECT * FROM products where id = $1", id); err != nil {
 		return p, fmt.Errorf("models/products: error getting product by id: %w", err)
 	}
 
@@ -71,7 +71,7 @@ func (pr *productsRepo) GetByID(id int) (Product, error) {
 }
 
 func (pr *productsRepo) DeleteByID(id int) error {
-	if _, err := pr.db.Exec("DELETE FROM public.product WHERE id=$1", id); err != nil {
+	if _, err := pr.db.Exec("DELETE FROM products WHERE id=$1", id); err != nil {
 		return fmt.Errorf("models/products: error deleting product: %w", err)
 	}
 
@@ -81,7 +81,7 @@ func (pr *productsRepo) DeleteByID(id int) error {
 func (pr *productsRepo) UpdateByID(id int, p Product) error {
 	if _, err := pr.db.Exec(
 		`
-		UPDATE product
+		UPDATE products
 		SET price = $1, name = $2, description = $3, imagepath = $4
 		WHERE id = $5
 		`,
@@ -103,7 +103,7 @@ func (pr *productsRepo) Create(p Product) (int, error) {
 	if err := pr.db.Get(
 		&lastID,
 		`
-		INSERT INTO public.product (price, name, description)
+		INSERT INTO products (price, name, description)
 		VALUES ($1, $2, $3) RETURNING id
 		`,
 		p.Price,
@@ -120,7 +120,7 @@ func (pr *productsRepo) InsertImages(productID int, imageKeys []string) error {
 	for _, name := range imageKeys {
 		if _, err := pr.db.Exec(
 			`
-			INSERT INTO .images (product_id, name)
+			INSERT INTO images (product_id, name)
 			VALUES ($1, $2)
 			`,
 			productID,
@@ -139,7 +139,7 @@ func (pr *productsRepo) DeleteImage(imageID int) (string, error) {
 
 	if err := pr.db.Get(
 		&imageKey,
-		"DELETE FROM image WHERE id = $1 RETURNING name",
+		"DELETE FROM images WHERE id = $1 RETURNING name",
 		imageID,
 	); err != nil {
 		return "", fmt.Errorf("models/products: error deleting image: %w", err)

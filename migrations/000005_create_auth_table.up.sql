@@ -1,4 +1,4 @@
-CREATE TABLE authentication (
+CREATE TABLE authentications (
   id serial NOT NULL PRIMARY KEY,
   user_id int NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   valid_until timestamp,

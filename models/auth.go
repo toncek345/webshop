@@ -33,7 +33,7 @@ func (ar *authRepo) IsAuth(token string) (bool, error) {
 		&auth,
 		`
 		SELECT id, user_id, valid_until, token
-		FROM authentication WHERE token=$1
+		FROM authentications WHERE token=$1
 		`,
 		token); err != nil {
 		if err == sql.ErrNoRows {
@@ -76,7 +76,7 @@ func (ar *authRepo) AuthUser(user User, password string) (Authentication, error)
 func (ar *authRepo) createAuth(a Authentication) error {
 	if _, err := ar.db.Exec(
 		`
-		INSERT INTO authentication
+		INSERT INTO authentications
 		(user_id, valid_until, token)
 		VALUES ($1, $2, $3)"
 		`,
@@ -91,7 +91,7 @@ func (ar *authRepo) createAuth(a Authentication) error {
 
 func (ar *authRepo) RemoveAuth(token string) error {
 	if _, err := ar.db.Exec(
-		"UPDATE authenticaion SET valid_until = now() WHERE token = $1",
+		"UPDATE authenticaions SET valid_until = now() WHERE token = $1",
 		token); err != nil {
 		return fmt.Errorf("models/auth: error invalidating authorization: %w", err)
 	}
