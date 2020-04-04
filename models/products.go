@@ -21,10 +21,10 @@ type Images struct {
 }
 
 type Product struct {
-	ID          int    `db:"id"`
-	Price       int    `db:"price"`
-	Name        string `db:"name"`
-	Description string `db:"description"`
+	ID          int     `db:"id"`
+	Price       float64 `db:"price"`
+	Name        string  `db:"name"`
+	Description string  `db:"description"`
 	Images      []Images
 }
 
