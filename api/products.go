@@ -163,8 +163,7 @@ func (app *App) productDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = app.models.Products.DeleteById(id)
-	if err != nil {
+	if err = app.models.Products.DeleteByID(id); err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return
@@ -190,7 +189,7 @@ func (app *App) productUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = app.models.Products.UpdateById(id, n)
+	err = app.models.Products.UpdateByID(id, n)
 	if err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)

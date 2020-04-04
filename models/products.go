@@ -1,176 +1,149 @@
 package models
 
 import (
-	"database/sql"
-	"errors"
+	"fmt"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type productsRepo struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
-func newProductsRepo(sqlDB *sql.DB) productsRepo {
+func newProductsRepo(sqlDB *sqlx.DB) productsRepo {
 	return productsRepo{db: sqlDB}
 }
 
 type Images struct {
-	Id        int    `db:"id"`
-	ProductId int    `db:"product_id"`
+	ID        int    `db:"id"`
+	ProductID int    `db:"product_id"`
 	Name      string `db:"name"`
 }
 
 type Product struct {
-	Id          int    `db:"id"`
+	ID          int    `db:"id"`
 	Price       int    `db:"price"`
 	Name        string `db:"name"`
 	Description string `db:"description"`
 	Images      []Images
 }
 
-var (
-	ProductNotCreatedError = errors.New("Product not created")
-	NoSuchIdProductError   = errors.New("Product not found by given ID")
-	ImageNotCreatedError   = errors.New("Image not created")
-)
-
-func (pr *productsRepo) Get() (p []Product, err error) {
-	var productRes *sql.Rows
-	productRes, err = pr.db.Query("SELECT * FROM public.product")
-	if err != nil {
-		return
+func (pr *productsRepo) Get() ([]Product, error) {
+	var products []Product
+	if err := pr.db.Select(
+		&products,
+		"SELECT * FROM product"); err != nil {
+		return nil, fmt.Errorf("models/products: erorr getting products: %w", err)
 	}
 
-	for productRes.Next() {
-		tempProduct := Product{
-			Images: []Images{},
-		}
+	productIDs := make([]int, 0, len(products))
+	for _, p := range products {
+		productIDs = append(productIDs, p.ID)
+	}
 
-		err = productRes.Scan(&tempProduct.Id, &tempProduct.Price, &tempProduct.Name, &tempProduct.Description)
-		if err != nil {
-			return
-		}
+	var images []Images
+	if err := pr.db.Select(
+		&images,
+		"SELECT * FROM images WHERE product_id IN ($1)",
+		productIDs,
+	); err != nil {
+		return nil, fmt.Errorf("models/products: error getting images for products: %w", err)
+	}
 
-		// find all images for product
-		var imageRes *sql.Rows
-		imageRes, err = pr.db.Query("SELECT * FROM public.images i WHERE i.product_id = $1",
-			tempProduct.Id)
-		if err != nil {
-			return
-		}
-
-		for imageRes.Next() {
-			tempImg := Images{}
-			err = imageRes.Scan(&tempImg.Id, &tempImg.ProductId, &tempImg.Name)
-			if err != nil {
-				return
+	for _, i := range images {
+		for _, p := range products {
+			if i.ProductID == p.ID {
+				p.Images = append(p.Images, i)
 			}
-
-			tempProduct.Images = append(tempProduct.Images, tempImg)
 		}
-
-		// append all to the product
-		p = append(p, tempProduct)
 	}
 
-	return
+	return products, nil
 }
 
-func (pr *productsRepo) GetById(id int) (p Product, err error) {
-	var res *sql.Row
-	res = pr.db.QueryRow("SELECT * FROM public.product p WHERE p.id = $1", id)
-	err = res.Scan(&p.Id, &p.Price, &p.Name, &p.Description)
-	if err != nil {
-		return
+func (pr *productsRepo) GetByID(id int) (Product, error) {
+	var p Product
+	if err := pr.db.Get(&p, "SELECT * FROM product where id = $1", id); err != nil {
+		return p, fmt.Errorf("models/products: error getting product by id: %w", err)
 	}
 
-	return
+	return p, nil
 }
 
-func (pr *productsRepo) DeleteById(id int) (productId int, err error) {
-	res := pr.db.QueryRow("DELETE FROM public.product WHERE id=$1 RETURNING id", id)
-	err = res.Scan(&productId)
-	if err != nil {
-		return
-	}
-
-	return
-}
-
-func (pr *productsRepo) UpdateById(id int, p Product) error {
-	res, err := pr.db.Exec(
-		`
-		UPDATE public.product
-		SET price=$1, name=$2, description=$3, imagepath=$4
-		WHERE id = $5
-		`,
-		p.Price,
-		p.Name,
-		p.Description,
-		id)
-	if err != nil {
-		return err
-	}
-
-	rows, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rows == 0 {
-		return NoSuchIdProductError
+func (pr *productsRepo) DeleteByID(id int) error {
+	if _, err := pr.db.Exec("DELETE FROM public.product WHERE id=$1", id); err != nil {
+		return fmt.Errorf("models/products: error deleting product: %w", err)
 	}
 
 	return nil
 }
 
-func (pr *productsRepo) Create(p Product) (productId int, err error) {
-	row := pr.db.QueryRow(
+func (pr *productsRepo) UpdateByID(id int, p Product) error {
+	if _, err := pr.db.Exec(
+		`
+		UPDATE product
+		SET price = $1, name = $2, description = $3, imagepath = $4
+		WHERE id = $5
+		`,
+		p.Price,
+		p.Name,
+		p.Description,
+		id); err != nil {
+		return fmt.Errorf("models/products: error updating by id: %w", err)
+	}
+
+	return nil
+}
+
+func (pr *productsRepo) Create(p Product) (int, error) {
+	lastID := struct {
+		LastID int `db:"id"`
+	}{}
+
+	if err := pr.db.Get(
+		&lastID,
 		`
 		INSERT INTO public.product (price, name, description)
 		VALUES ($1, $2, $3) RETURNING id
 		`,
 		p.Price,
 		p.Name,
-		p.Description)
+		p.Description,
+	); err != nil {
+		return 0, fmt.Errorf("models/products: error creating product: %w", err)
+	}
 
-	err = row.Scan(&productId)
-
-	return
+	return lastID.LastID, nil
 }
 
-func (pr *productsRepo) InsertImages(productId int, imageNames []string) error {
-	for _, name := range imageNames {
-		res, err := pr.db.Exec(
+func (pr *productsRepo) InsertImages(productID int, imageKeys []string) error {
+	for _, name := range imageKeys {
+		if _, err := pr.db.Exec(
 			`
-			INSERT INTO public.images (product_id, name)
+			INSERT INTO .images (product_id, name)
 			VALUES ($1, $2)
 			`,
-			productId,
-			name)
-		if err != nil {
-			return err
-		}
-
-		rows, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-
-		if rows == 0 {
-			return ImageNotCreatedError
+			productID,
+			name); err != nil {
+			return fmt.Errorf("models/products: error inserting images: %w", err)
 		}
 	}
 
 	return nil
 }
 
-func (pr *productsRepo) DeleteImage(imageId int) (imageName string, err error) {
-	row := pr.db.QueryRow("DELETE FROM public.image WHERE id=$1 RETURNING name", imageId)
+func (pr *productsRepo) DeleteImage(imageID int) (string, error) {
+	imageKey := struct {
+		ImageKey string `db:"name"`
+	}{}
 
-	err = row.Scan(&imageName)
-	if err != nil {
-		return
+	if err := pr.db.Get(
+		&imageKey,
+		"DELETE FROM image WHERE id = $1 RETURNING name",
+		imageID,
+	); err != nil {
+		return "", fmt.Errorf("models/products: error deleting image: %w", err)
 	}
 
-	return
+	return imageKey.ImageKey, nil
 }
