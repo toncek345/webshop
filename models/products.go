@@ -33,7 +33,7 @@ func (pr *productsRepo) Get() ([]Product, error) {
 	if err := pr.db.Select(
 		&products,
 		"SELECT * FROM product"); err != nil {
-		return nil, fmt.Errorf("models/products: erorr getting products: %w", err)
+		return nil, fmt.Errorf("models/products: error getting products: %w", err)
 	}
 
 	productIDs := make([]int, 0, len(products))

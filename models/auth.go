@@ -2,10 +2,10 @@ package models
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	uuid "github.com/satori/go.uuid"
 	"github.com/senko/clog"
@@ -13,146 +13,87 @@ import (
 )
 
 type authRepo struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
-func newAuthRepo(sqlDB *sql.DB) authRepo {
+func newAuthRepo(sqlDB *sqlx.DB) authRepo {
 	return authRepo{db: sqlDB}
 }
 
-type Authenticate struct {
-	Id         int       `db:"id"`
-	UserId     int       `db:"user_id"`
+type Authentication struct {
+	ID         int       `db:"id"`
+	UserID     int       `db:"user_id"`
 	ValidUntil time.Time `db:"valid_until"`
 	Token      string    `db:"token"`
 }
 
-// errors
-var (
-	errAuthNotCreated = errors.New("Authentication not created")
-	errAuthNotDeleted = errors.New("Authentication not deleted")
-)
-
-func (ar *authRepo) IsAuth(token string) bool {
-	var res *sql.Row
-	res = ar.db.QueryRow(
+func (ar *authRepo) IsAuth(token string) (bool, error) {
+	var auth Authentication
+	if err := ar.db.Get(
+		&auth,
 		`
-		SELECT id, user_id, TO_CHAR(valid_until, 'YYYY-MM-DD HH24:MI:SS') valid_until, token
-		FROM public.authentication WHERE token=$1
+		SELECT id, user_id, valid_until, token
+		FROM authentication WHERE token=$1
 		`,
-		token)
+		token); err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
 
-	var timestampStr string
-	auth := Authenticate{}
-
-	err := res.Scan(&auth.Id, &auth.UserId, &timestampStr, &auth.Token)
-	if err != nil {
-		clog.Warningf("Auth DB scan error: %s", err)
-		return false
-	}
-
-	auth.ValidUntil, err = time.Parse("2006-01-02 15:04:05", timestampStr)
-	if err != nil {
-		clog.Warningf("Timestamp parse error: %s", err)
-		return false
+		return false, fmt.Errorf("models/auth: error getting auth: %w", err)
 	}
 
 	if time.Now().Unix() > auth.ValidUntil.Unix() {
-		clog.Infof("Auth expired, id:%d, expiration:%s", auth.Id, auth.ValidUntil)
-		return false
+		clog.Infof("Auth expired, id:%d, expiration:%s", auth.ID, auth.ValidUntil)
+		return false, nil
 	}
 
-	return true
+	return true, nil
 }
 
-func (ar *authRepo) AuthUser(user User, password string) (Authenticate, error) {
+func (ar *authRepo) AuthUser(user User, password string) (Authentication, error) {
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		clog.Debug("pssst password doesn't match")
-		return Authenticate{}, fmt.Errorf("models/auth: user doesn't match")
+		return Authentication{}, fmt.Errorf("models/auth: user not found")
 	}
 
 	token := uuid.NewV4().String()
 
-	a := Authenticate{
+	a := Authentication{
 		Token:      token,
-		UserId:     user.ID,
+		UserID:     user.ID,
 		ValidUntil: time.Now().Add(time.Hour * 24),
 	}
 
 	if err := ar.createAuth(a); err != nil {
 		clog.Warningf("Auth not created: %s", err)
-		return Authenticate{}, err
+		return Authentication{}, err
 	}
 
 	return a, nil
 }
 
-func (ar *authRepo) createAuth(a Authenticate) error {
-	res, err := ar.db.Exec(
+func (ar *authRepo) createAuth(a Authentication) error {
+	if _, err := ar.db.Exec(
 		`
-		INSERT INTO public.authentication
+		INSERT INTO authentication
 		(user_id, valid_until, token)
 		VALUES ($1, $2, $3)"
 		`,
-		a.UserId,
+		a.UserID,
 		pq.FormatTimestamp(a.ValidUntil),
-		a.Token)
-	if err != nil {
-		return err
-	}
-
-	rows, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rows == 0 {
-		return errAuthNotCreated
+		a.Token); err != nil {
+		return fmt.Errorf("models/auth: error inserting auth: %w", err)
 	}
 
 	return nil
 }
 
 func (ar *authRepo) RemoveAuth(token string) error {
-	auth := Authenticate{}
-
-	res := ar.db.QueryRow(
-		`
-		SELECT id, user_id, TO_CHAR(valid_until, 'YYYY-MM-DD HH24:MI:SS') valid_until, token
-		FROM public.authentication WHERE token=$1
-		`,
-		token)
-
-	var validUntil string
-	err := res.Scan(&auth.Id, &auth.UserId, &validUntil, &auth.Token)
-	if err != nil {
-		clog.Warningf("%s", err)
-		return err
-	}
-
-	auth.ValidUntil = time.Now()
-
-	// remove auth
-	resRows, err := ar.db.Exec(
-		`
-		UPDATE public.authentication
-		SET valid_until=$1
-		WHERE id=$2
-		`,
-		pq.FormatTimestamp(auth.ValidUntil),
-		auth.Id)
-	if err != nil {
-		clog.Errorf("Auth removal error: %s", err)
-		return err
-	}
-
-	rows, err := resRows.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rows == 0 {
-		return errAuthNotDeleted
+	if _, err := ar.db.Exec(
+		"UPDATE authenticaion SET valid_until = now() WHERE token = $1",
+		token); err != nil {
+		return fmt.Errorf("models/auth: error invalidating authorization: %w", err)
 	}
 
 	return nil

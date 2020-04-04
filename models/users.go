@@ -54,7 +54,7 @@ func (ur *usersRepo) CreateUser(u User) error {
 		VALUES ($1, $2)`,
 		u.Username,
 		u.Password); err != nil {
-		return fmt.Errorf("models/users: erorr creating user: %w", err)
+		return fmt.Errorf("models/users: error creating user: %w", err)
 	}
 
 	return nil
