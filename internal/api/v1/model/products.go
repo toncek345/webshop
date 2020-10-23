@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 type productsRepo struct {
@@ -15,32 +16,32 @@ func newProductsRepo(sqlDB *sqlx.DB) productsRepo {
 }
 
 type Product struct {
-	ID          int     `db:"id"`
-	Price       float64 `db:"price"`
-	Name        string  `db:"name"`
-	Description string  `db:"description"`
+	ID          int     `db:"id" json:"id"`
+	Price       float64 `db:"price" json:"price"`
+	Name        string  `db:"name" json:"name"`
+	Description string  `db:"description" json:"description"`
 
-	Images []*Image `db:"-"`
+	Images []*Image `db:"-" json:"images"`
 }
 
-func (pr *productsRepo) Get() ([]Product, error) {
-	var products []Product
+func (pr *productsRepo) Get() ([]*Product, error) {
+	var products []*Product
 	if err := pr.db.Select(
 		&products,
 		"SELECT * FROM products"); err != nil {
 		return nil, fmt.Errorf("models/products: error getting products: %w", err)
 	}
 
-	productIDs := make([]int, 0, len(products))
+	productIDs := make([]int64, 0, len(products))
 	for _, p := range products {
-		productIDs = append(productIDs, p.ID)
+		productIDs = append(productIDs, int64(p.ID))
 	}
 
 	var images []*Image
 	if err := pr.db.Select(
 		&images,
-		`SELECT * FROM images WHERE product_id IN ($1)`,
-		productIDs,
+		`SELECT * FROM images WHERE product_id = any($1)`,
+		pq.Array(productIDs),
 	); err != nil {
 		return nil, fmt.Errorf("models/products: error getting images for products: %w", err)
 	}

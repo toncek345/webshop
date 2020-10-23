@@ -1,11 +1,15 @@
 - id: 1
-  key: path/to/you.jpg
+  path: dummy.png
   product_id: 1
 
 - id: 2
-  key: path/to/you2.jpg
+  path: dummy.png
   product_id: 1
 
 - id: 3
-  key: path/to/you3.jpg
+  path: dummy.png
   product_id: 2
+
+- id: 4
+  path: dummy.png
+  product_id: 3

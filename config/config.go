@@ -61,8 +61,6 @@ func New(env Environment) (*Config, error) {
 		return nil, fmt.Errorf("config: error unmarshalling yaml: %w", err)
 	}
 
-	fmt.Printf("cfg env is: %s\n\n\n\n", cfg.Env)
-
 	return cfg, nil
 }
 

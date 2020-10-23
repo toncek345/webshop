@@ -47,7 +47,7 @@ func RegisterCommand(app *cli.App) {
 				r.Mount("/", api.New(db, storage))
 				// static folder serves only images and other non front static files
 				r.Get("/static/*", func(w http.ResponseWriter, r *http.Request) {
-					fs := http.StripPrefix("/api/static", http.FileServer(http.Dir(config.StaticPath)))
+					fs := http.StripPrefix("/static", http.FileServer(http.Dir(config.StaticPath)))
 					fs.ServeHTTP(w, r)
 				})
 
