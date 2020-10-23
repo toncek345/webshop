@@ -1,0 +1,14 @@
+- id: 1
+  price: 123.4
+  name: boots
+  description: something you wear on your legs
+
+- id: 2
+  price: 13.4
+  name: chain
+  description: something to tie your bike
+
+- id: 3
+  price: 1.45
+  name: paper
+  description: something to write on
