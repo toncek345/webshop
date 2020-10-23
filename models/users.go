@@ -36,7 +36,7 @@ func (ur *usersRepo) UpdateUser(id int, u User) error {
 	if _, err := ur.db.Exec(
 		`
 		UPDATE users
-		SET username=$1, public.user.password=$2
+		SET username = $1, public.user.password = $2
 		WHERE id=$3
 		`,
 		u.Username,

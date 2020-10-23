@@ -59,8 +59,7 @@ func (app *App) createImage(w http.ResponseWriter, r *http.Request) {
 	filename := fmt.Sprintf("product-%s.jpg", uuid.NewV4().String())
 	ioutil.WriteFile(app.staticFolderPath+filename, binaryImage, os.ModePerm)
 
-	err = app.models.Products.InsertImages(productId, []string{filename})
-	if err != nil {
+	if err := app.models.Products.InsertImages(productId, []string{filename}); err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return
@@ -77,30 +76,30 @@ func (app *App) deleteImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	imgName, err := app.models.Products.DeleteImage(imageId)
+	_, err = app.models.Products.DeleteImage(imageId)
 	if err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	err = os.Remove(app.staticFolderPath + imgName)
-	if err != nil {
-		clog.Warningf("%s", err)
-		app.JSONRespond(w, r, http.StatusInternalServerError, err)
-		return
-	}
+	// TODO: Same as upper call. Discarding this in v1 since the same image can be
+	// referenced by news.
+	// err = os.Remove(app.staticFolderPath + imgName)
+	// if err != nil {
+	// 	clog.Warningf("%s", err)
+	// 	app.JSONRespond(w, r, http.StatusInternalServerError, err)
+	// 	return
+	// }
 
 	app.JSONRespond(w, r, http.StatusOK, nil)
 }
 
 func (app *App) createProduct(w http.ResponseWriter, r *http.Request) {
-	type newProduct struct {
-		Product models.Product
-		Images  []string // base64 encoded images
+	var obj struct {
+		Product models.Product `json:"product"`
+		Images  []string       `json:"images"` // base64 encoded images
 	}
-
-	var obj newProduct
 
 	if err := app.JSONDecode(r, &obj); err != nil {
 		clog.Warningf("%s", err)
@@ -163,7 +162,7 @@ func (app *App) productDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = app.models.Products.DeleteByID(id); err != nil {
+	if err := app.models.Products.DeleteByID(id); err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return
@@ -173,7 +172,11 @@ func (app *App) productDelete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *App) productUpdate(w http.ResponseWriter, r *http.Request) {
-	var n models.Product
+	var obj struct {
+		Price       float64 `json:"price"`
+		Name        string  `json:"name"`
+		Description string  `json:"description"`
+	}
 
 	id, err := parseUrlVarsInt(r, "id")
 	if err != nil {
@@ -182,15 +185,19 @@ func (app *App) productUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = app.JSONDecode(r, &n)
-	if err != nil {
+	if err := app.JSONDecode(r, &obj); err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	err = app.models.Products.UpdateByID(id, n)
-	if err != nil {
+	if err := app.models.Products.UpdateByID(
+		id,
+		models.Product{
+			Price:       obj.Price,
+			Name:        obj.Name,
+			Description: obj.Description,
+		}); err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return

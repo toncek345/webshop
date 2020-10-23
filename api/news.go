@@ -39,14 +39,12 @@ func (app *App) getNews(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *App) createNews(w http.ResponseWriter, r *http.Request) {
-	type newNews struct {
-		News  models.News
-		Image string // base64 encoded image
+	var obj struct {
+		News  models.News `json:"news"`
+		Image string      `json:"image"` // base64 encoded image
 	}
-	var obj newNews
 
-	err := app.JSONDecode(r, &obj)
-	if err != nil {
+	if err := app.JSONDecode(r, &obj); err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusBadRequest, err)
 		return
@@ -67,10 +65,8 @@ func (app *App) createNews(w http.ResponseWriter, r *http.Request) {
 
 	imageFilename := fmt.Sprintf("news-%s.jpg", uuid.NewV4().String())
 	ioutil.WriteFile(app.staticFolderPath+imageFilename, binaryImage, os.ModePerm)
-	obj.News.ImageKey = imageFilename
 
-	err = app.models.News.CreateNews(obj.News)
-	if err != nil {
+	if err := app.models.News.CreateNews(obj.News, models.Image{Key: imageFilename}); err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return
@@ -94,22 +90,20 @@ func (app *App) deleteNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := app.models.News.DeleteByID(id); err != nil {
+	if err := app.models.News.DeleteByID(news.ID); err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	os.Remove(app.staticFolderPath + news.ImageKey)
 	app.JSONRespond(w, r, http.StatusOK, nil)
 }
 
 func (app *App) updateNews(w http.ResponseWriter, r *http.Request) {
-	type newNews struct {
-		News  models.News
-		Image string // base64 encoded image
+	var obj struct {
+		Header string `json:"header"`
+		Text   string `json:"text"`
 	}
-	var obj newNews
 
 	id, err := parseUrlVarsInt(r, "id")
 	if err != nil {
@@ -118,8 +112,7 @@ func (app *App) updateNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = app.JSONDecode(r, &obj)
-	if err != nil {
+	if err := app.JSONDecode(r, &obj); err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusBadRequest, err)
 		return
@@ -132,17 +125,12 @@ func (app *App) updateNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := base64.StdEncoding.DecodeString(obj.Image)
-	if err != nil {
-		clog.Warningf("%s", err)
-		app.JSONRespond(w, r, http.StatusBadRequest, err)
-		return
-	}
-
-	ioutil.WriteFile(app.staticFolderPath+n.ImageKey, data, os.ModePerm)
-
-	err = app.models.News.UpdateByID(id, n)
-	if err != nil {
+	if err := app.models.News.UpdateByID(
+		n.ID,
+		models.News{
+			Header: obj.Header,
+			Text:   obj.Text,
+		}); err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return

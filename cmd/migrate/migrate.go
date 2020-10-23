@@ -26,7 +26,7 @@ func RegisterCommand(app *cli.App) {
 			Name:  "migrate",
 			Usage: "migration actions",
 			Subcommands: []*cli.Command{
-				&cli.Command{
+				{
 					Name:  "up",
 					Usage: "runs pending migrations",
 					Flags: []cli.Flag{
@@ -56,7 +56,7 @@ func RegisterCommand(app *cli.App) {
 						return nil
 					},
 				},
-				&cli.Command{
+				{
 					Name:  "down",
 					Usage: "removes recent migration",
 					Flags: []cli.Flag{
@@ -93,7 +93,7 @@ func RegisterCommand(app *cli.App) {
 						return nil
 					},
 				},
-				&cli.Command{
+				{
 					Name:  "drop",
 					Usage: "drops database",
 					Flags: []cli.Flag{

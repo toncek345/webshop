@@ -53,7 +53,7 @@ func (app *App) Router() chi.Router {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}).Handler)
 
-	r.Route("/api", func(r chi.Router) {
+	r.Route("/api/v1", func(r chi.Router) {
 		r.Use(middleware.Logger)
 		r.Use(middleware.Recoverer)
 		r.Use(middleware.Timeout(60 * time.Second))
@@ -65,12 +65,12 @@ func (app *App) Router() chi.Router {
 		app.newsRouter(r)
 		app.adminRouter(r)
 		app.productRouter(r)
+	})
 
-		// static folder serves only images and other non front static files
-		r.Get("/static/*", func(w http.ResponseWriter, r *http.Request) {
-			fs := http.StripPrefix("/api/static", http.FileServer(http.Dir(app.staticFolderPath)))
-			fs.ServeHTTP(w, r)
-		})
+	// static folder serves only images and other non front static files
+	r.Get("/static/*", func(w http.ResponseWriter, r *http.Request) {
+		fs := http.StripPrefix("/api/static", http.FileServer(http.Dir(app.staticFolderPath)))
+		fs.ServeHTTP(w, r)
 	})
 
 	return r
