@@ -3,7 +3,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
-import { PageHeader, Grid, Row, Col, Modal, Image, Button, Carousel } from 'react-bootstrap';
+import { Grid, Row, Modal, Image, Button, Carousel } from 'react-bootstrap';
 
 import { getProducts, addToCart, removeFromCart } from '../actions/products';
 
@@ -18,23 +18,19 @@ class Products extends React.Component {
       selectedProduct: null,
       modal: false,
     };
-
-    this.redirectTo = this.redirectTo.bind(this);
-    this.handleProductSelect = this.handleProductSelect.bind(this);
-    this.handleCloseModal = this.handleCloseModal.bind(this);
   }
 
-  componentWillMount() {
+  componentWillMount = () => {
     this.props.getProducts();
   }
 
-  redirectTo(path) {
+  redirectTo = (path) =>{
     this.props.history.push(path);
   }
 
-  handleProductSelect(id) {
+  handleProductSelect= (id)=>  {
     const selectedProduct = this.props.products.find((product) => {
-      if (product.Id === id) {
+      if (product.id === id) {
         return product;
       }
       return undefined; // linter satisfied
@@ -46,15 +42,15 @@ class Products extends React.Component {
     });
   }
 
-  handleCloseModal() {
+  handleCloseModal= ()=> {
     this.setState({
       selectedProduct: null,
       modal: false,
     });
   }
 
-  isSelectedProductInCart() {
-    if (this.props.cartItems.find(item => item.Id === this.state.selectedProduct.Id)) { return true; }
+  isSelectedProductInCart = () => {
+    if (this.props.cartItems.find(item => item.id === this.state.selectedProduct.id)) { return true; }
 
     return false;
   }
@@ -73,14 +69,14 @@ class Products extends React.Component {
       modal = (
         <Modal show={this.state.modal} onHide={this.handleCloseModal} >
           <Modal.Header closeButton>
-            <Modal.Title>{this.state.selectedProduct.Name}</Modal.Title>
+            <Modal.Title>{this.state.selectedProduct.name}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Carousel>
 
-              {this.state.selectedProduct.Images.map(item => (
-                <Carousel.Item key={item.Id}>
-                  <Image src={`${ServerIp}/api/v1/static/${item.Name}`} />
+              {this.state.selectedProduct.images.map(item => (
+                <Carousel.Item key={item.id}>
+                  <Image src={`${ServerIp}/static/${item.path}`} />
                 </Carousel.Item>
                   ))
               }
@@ -88,7 +84,7 @@ class Products extends React.Component {
             </Carousel>
             <Grid>
               <Row>
-                <h2>Cijena: {this.state.selectedProduct.Price / 100} kn  </h2>
+                <h2>Cijena: {this.state.selectedProduct.price} kn  </h2>
 
               </Row>
               <Row>
@@ -109,7 +105,7 @@ class Products extends React.Component {
             </Grid>
             <p />
             <hr />
-            <div dangerouslySetInnerHTML={{ __html: this.state.selectedProduct.Description }} />
+            <div dangerouslySetInnerHTML={{ __html: this.state.selectedProduct.description }} />
 
           </Modal.Body>
         </Modal>
@@ -124,12 +120,12 @@ class Products extends React.Component {
           <Row>
             {this.props.products && this.props.products.map(item => (
               <Card
-                key={item.Id}
-                itemId={item.Id}
-                imageUrl={item.Images && item.Images[0] && item.Images[0].Name}
-                heading={item.Name}
+                key={item.id}
+                itemId={item.id}
+                imageUrl={item.images && item.images[0] && item.images[0].path}
+                heading={item.name}
                 action={this.handleProductSelect}
-                price={item.Price}
+                price={item.price}
               />
               ))
             }

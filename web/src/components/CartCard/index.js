@@ -11,11 +11,11 @@ const CartCard = ({ item, removeFromCartAction }) => (
     </Panel.Heading>
     <Panel.Body>
       <Col xs={3} md={3}>
-        <Image responsive src={`${ServerIp}/api/v1/static/${item.Images[0].Name}`} style={{ height: 150 }} />
+        <Image responsive src={`${ServerIp}/static/${item.images[0].path}`} style={{ height: 150 }} />
       </Col>
       <Col xs={6} md={6}>
-        {item.Name}<br />
-        {item.Price / 100} kn<br />
+        {item.name}<br />
+        {item.price} kn<br />
         <Button onClick={() => removeFromCartAction(item)} bsStyle="danger">Makni iz košarice</Button>
       </Col>
     </Panel.Body>

@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
-import { PageHeader, Grid, Row } from 'react-bootstrap';
+import { Grid, Row } from 'react-bootstrap';
 
 import Navigation from '../components/Navigation';
 import CartCard from '../components/CartCard';
@@ -32,7 +32,7 @@ class Cart extends React.Component {
           ) : (
             this.props.cartItems.map(item => (
               <CartCard
-                key={item.Id}
+                key={item.id}
                 item={item}
                 removeFromCartAction={this.props.removeFromCart}
               />
@@ -59,4 +59,3 @@ function mapDispatchToProps(dispatch) {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Cart);
-

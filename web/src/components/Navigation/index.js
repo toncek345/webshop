@@ -10,21 +10,18 @@ const Navigation = ({
   <Navbar>
     <Navbar.Header>
       <Navbar.Brand>
-        <a href="#" onClick={() => redirectTo(Routes.home.path)}>Generic webshop</a>
+        <a onClick={() => redirectTo(Routes.home.path)}>Generic webshop</a>
       </Navbar.Brand>
       <Navbar.Toggle />
     </Navbar.Header>
     <Navbar.Collapse>
       <Nav>
-        <NavItem href="#" onClick={() => redirectTo(Routes.home.path)}>
-        News
-        </NavItem>
-        <NavItem href="#" onClick={() => redirectTo(Routes.products.path)}>
+        <NavItem onClick={() => redirectTo(Routes.home.path)}>
         Products
         </NavItem>
       </Nav>
       <Nav pullRight>
-        <NavItem href="#" onClick={() => redirectTo(Routes.cart.path)}>
+        <NavItem onClick={() => redirectTo(Routes.cart.path)}>
           Cart <Badge>{itemsInCart}</Badge>
         </NavItem>
       </Nav>
