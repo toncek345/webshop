@@ -23,25 +23,3 @@ func New(sqlDB *sqlx.DB) (Models, error) {
 		Auth:     newAuthRepo(sqlDB),
 	}, nil
 }
-
-// 	// creating admin
-// 	var hash []byte
-// 	hash, err = bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
-// 	if err != nil {
-// 		clog.Errorf("%s", err)
-// 		return
-// 	}
-
-// 	admin := User{
-// 		Username: "admin",
-// 		Password: string(hash),
-// 	}
-
-// 	err = CreateUser(admin)
-// 	if err != nil {
-// 		clog.Errorf("%s", err)
-// 		return
-// 	}
-
-// 	return err
-// }
