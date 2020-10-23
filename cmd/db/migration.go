@@ -1,6 +1,7 @@
 package db
 
 import (
+	"github.com/toncek345/webshop/config"
 	cli "github.com/urfave/cli/v2"
 )
 
@@ -15,7 +16,7 @@ var up *cli.Command = &cli.Command{
 		},
 	},
 	Action: func(ctx *cli.Context) error {
-		cfg, err := getCfg(ctx.String("env"))
+		cfg, err := config.New(config.Environment(ctx.String("env")))
 		if err != nil {
 			return err
 		}
@@ -44,7 +45,7 @@ var down *cli.Command = &cli.Command{
 		},
 	},
 	Action: func(ctx *cli.Context) error {
-		cfg, err := getCfg(ctx.String("env"))
+		cfg, err := config.New(config.Environment(ctx.String("env")))
 		if err != nil {
 			return err
 		}
@@ -73,7 +74,7 @@ var drop *cli.Command = &cli.Command{
 		},
 	},
 	Action: func(ctx *cli.Context) error {
-		cfg, err := getCfg(ctx.String("env"))
+		cfg, err := config.New(config.Environment(ctx.String("env")))
 		if err != nil {
 			return err
 		}

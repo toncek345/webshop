@@ -13,32 +13,6 @@ import (
 	cli "github.com/urfave/cli/v2"
 )
 
-// TODO: fixtures
-// dbInit = flag.Bool(
-// 	"dbInit",
-// 	false,
-// 	"set to true when db is done and tables need to be created, run only once")
-
-// TODO: fixtures
-// if *dbInit {
-// 	if err := models.InitDb(); err != nil {
-// 		panic(err)
-// 	}
-// 	clog.Info("db init completed")
-// 	os.Exit(0)
-// }
-
-func getCfg(env string) (cfg config.Config, err error) {
-	switch env {
-	case "development":
-		cfg, err = config.New(config.DevEnv)
-	case "production":
-		cfg, err = config.New(config.ProdEnv)
-	}
-
-	return
-}
-
 func RegisterCommand(app *cli.App) {
 	app.Commands = append(
 		app.Commands,
@@ -54,7 +28,7 @@ func RegisterCommand(app *cli.App) {
 			Usage: "starts webserver",
 			Action: func(ctx *cli.Context) error {
 				clog.Setup(clog.DEBUG, false)
-				config, err := getCfg(ctx.String("env"))
+				config, err := config.New(config.Environment(ctx.String("env")))
 				if err != nil {
 					return err
 				}
@@ -64,8 +38,13 @@ func RegisterCommand(app *cli.App) {
 					return err
 				}
 
+				storage, err := config.Storage()
+				if err != nil {
+					return err
+				}
+
 				r := chi.NewRouter()
-				r.Mount("/", api.New(db, config.DiskStoragePath))
+				r.Mount("/", api.New(db, storage))
 				// static folder serves only images and other non front static files
 				r.Get("/static/*", func(w http.ResponseWriter, r *http.Request) {
 					fs := http.StripPrefix("/api/static", http.FileServer(http.Dir(config.StaticPath)))
@@ -86,8 +65,4 @@ func RegisterCommand(app *cli.App) {
 			},
 		},
 	)
-}
-
-func main() {
-
 }

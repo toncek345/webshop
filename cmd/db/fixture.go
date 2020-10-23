@@ -2,6 +2,7 @@ package db
 
 import (
 	cli "github.com/urfave/cli/v2"
+	"github.com/toncek345/webshop/config"
 )
 
 var fixture *cli.Command = &cli.Command{
@@ -15,7 +16,7 @@ var fixture *cli.Command = &cli.Command{
 		},
 	},
 	Action: func(ctx *cli.Context) error {
-		cfg, err := getCfg(ctx.String("env"))
+		cfg, err := config.New(config.Environment(ctx.String("env")))
 		if err != nil {
 			return err
 		}

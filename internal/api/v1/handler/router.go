@@ -8,20 +8,21 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"github.com/toncek345/webshop/internal/api/v1/model"
+	"github.com/toncek345/webshop/internal/pkg/storage"
 )
 
 type App struct {
-	storageDirPath string
-	models         model.Models
+	storage storage.Storage
+	models  model.Models
 }
 
 func New(
 	models model.Models,
-	storageDirPath string) *App {
+	storage storage.Storage) *App {
 
 	return &App{
-		models:         models,
-		storageDirPath: storageDirPath,
+		models:  models,
+		storage: storage,
 	}
 }
 

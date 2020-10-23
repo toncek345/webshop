@@ -10,11 +10,12 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/toncek345/webshop/internal/pkg/storage"
 	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
-	Env Environment
+	Env Environment `yaml:"-"`
 
 	// TODO: static and storage path are currently the same thing.
 	StaticPath      string `yaml:"static_path"`
@@ -31,32 +32,36 @@ type Config struct {
 	} `yaml:"postgres"`
 }
 
-type Environment int
+type Environment string
 
 const (
-	DevEnv = iota
-	ProdEnv
+	DevEnv  Environment = "development"
+	ProdEnv Environment = "production"
 )
 
-func New(env Environment) (Config, error) {
-	var cfg Config
+func New(env Environment) (*Config, error) {
+	cfg := &Config{Env: env}
 	var fileName string
-	if env == DevEnv {
+
+	switch env {
+	case DevEnv:
 		fileName = "config/development.yml"
-	} else {
+	case ProdEnv:
 		fileName = "config/production.yml"
+	default:
+		return nil, fmt.Errorf("%s env doesn't exist", env)
 	}
 
 	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		return cfg, fmt.Errorf("config: error reading file: %w", err)
+		return nil, fmt.Errorf("config: error reading file: %w", err)
 	}
 
 	if err := yaml.Unmarshal([]byte(data), &cfg); err != nil {
-		return cfg, fmt.Errorf("config: error unmarshalling yaml: %w", err)
+		return nil, fmt.Errorf("config: error unmarshalling yaml: %w", err)
 	}
 
-	cfg.Env = env
+	fmt.Printf("cfg env is: %s\n\n\n\n", cfg.Env)
 
 	return cfg, nil
 }
@@ -103,4 +108,8 @@ func (cfg *Config) fixturePath() string {
 	}
 
 	return "db/fixtures/dev"
+}
+
+func (cfg *Config) Storage() (storage.Storage, error) {
+	return &storage.Disk{DirPath: cfg.DiskStoragePath}, nil
 }

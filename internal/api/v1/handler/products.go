@@ -3,9 +3,7 @@ package handler
 import (
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi"
 	uuid "github.com/satori/go.uuid"
@@ -57,7 +55,11 @@ func (app *App) createImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filename := fmt.Sprintf("product-%s.jpg", uuid.NewV4().String())
-	ioutil.WriteFile(app.storageDirPath+filename, binaryImage, os.ModePerm)
+	if _, err := app.storage.Put(filename, binaryImage); err != nil {
+		clog.Error(err.Error())
+		app.JSONRespond(w, r, http.StatusInternalServerError, err)
+		return
+	}
 
 	if err := app.models.Products.InsertImages(productID, []string{filename}); err != nil {
 		clog.Warningf("%s", err)
@@ -83,8 +85,8 @@ func (app *App) deleteImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = os.Remove(app.storageDirPath + imgKey); err != nil {
-		clog.Warningf("%s", err)
+	if err := app.storage.Delete(imgKey); err != nil {
+		clog.Error(err.Error())
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return
 	}
@@ -124,7 +126,12 @@ func (app *App) createProduct(w http.ResponseWriter, r *http.Request) {
 			}
 
 			filename := fmt.Sprintf("product-%s.jpg", uuid.NewV4().String())
-			ioutil.WriteFile(app.storageDirPath+filename, data, os.ModePerm)
+			if _, err := app.storage.Put(filename, data); err != nil {
+				clog.Error(err.Error())
+				app.JSONRespond(w, r, http.StatusInternalServerError, err)
+				return
+			}
+
 			imageNames = append(imageNames, filename)
 
 			binaryImages[i] = data

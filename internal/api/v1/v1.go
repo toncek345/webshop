@@ -5,9 +5,10 @@ import (
 	"github.com/jmoiron/sqlx"
 	apiV1 "github.com/toncek345/webshop/internal/api/v1/handler"
 	"github.com/toncek345/webshop/internal/api/v1/model"
+	"github.com/toncek345/webshop/internal/pkg/storage"
 )
 
-func New(db *sqlx.DB, storagePath string) chi.Router {
+func New(db *sqlx.DB, storage storage.Storage) chi.Router {
 	r := chi.NewRouter()
 
 	model, err := model.New(db)
@@ -15,6 +16,6 @@ func New(db *sqlx.DB, storagePath string) chi.Router {
 		panic(err)
 	}
 
-	r.Mount("/v1", apiV1.New(model, storagePath).Router())
+	r.Mount("/v1", apiV1.New(model, storage).Router())
 	return r
 }
