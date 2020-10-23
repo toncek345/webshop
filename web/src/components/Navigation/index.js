@@ -1,12 +1,10 @@
-import React from 'react';
+import React from "react";
 
-import { Navbar, Nav, NavItem, Badge } from 'react-bootstrap';
+import { Navbar, Nav, NavItem, Badge } from "react-bootstrap";
 
-import { Routes } from '../../constants';
+import { Routes } from "../../constants";
 
-const Navigation = ({
-  redirectTo, itemsInCart,
-}) => (
+const Navigation = ({ redirectTo, itemsInCart }) => (
   <Navbar>
     <Navbar.Header>
       <Navbar.Brand>
@@ -16,9 +14,7 @@ const Navigation = ({
     </Navbar.Header>
     <Navbar.Collapse>
       <Nav>
-        <NavItem onClick={() => redirectTo(Routes.home.path)}>
-        Products
-        </NavItem>
+        <NavItem onClick={() => redirectTo(Routes.home.path)}>Products</NavItem>
       </Nav>
       <Nav pullRight>
         <NavItem onClick={() => redirectTo(Routes.cart.path)}>

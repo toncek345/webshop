@@ -8,24 +8,24 @@ const defaultState = {
 
 export default function Products(state = defaultState, action) {
   switch (action.type) {
-    case 'GET_PRODUCTS_PENDING':
+    case "GET_PRODUCTS_PENDING":
       return {
         ...state,
         loading: true,
       };
-    case 'GET_PRODUCTS_DONE':
+    case "GET_PRODUCTS_DONE":
       return {
         ...state,
         loading: false,
         allProducts: action.payload,
       };
-    case 'GET_PRODUCTS_FAIL':
+    case "GET_PRODUCTS_FAIL":
       return {
         ...state,
         loading: false,
         error: action.payload,
       };
-    case 'ADD_TO_CART':
+    case "ADD_TO_CART":
       return {
         ...state,
         cartItems: state.cartItems.concat({
@@ -33,7 +33,7 @@ export default function Products(state = defaultState, action) {
           numberOfItems: 1,
         }),
       };
-    case 'INCREASE_NUMBER_OF_ITEM':
+    case "INCREASE_NUMBER_OF_ITEM":
       return {
         ...state,
         cartItems: state.cartItems.map((item) => {
@@ -46,10 +46,12 @@ export default function Products(state = defaultState, action) {
           return { ...item };
         }),
       };
-    case 'REMOVE_FROM_CART':
+    case "REMOVE_FROM_CART":
       return {
         ...state,
-        cartItems: state.cartItems.filter(item => item.Id !== action.payload.Id),
+        cartItems: state.cartItems.filter(
+          (item) => item.Id !== action.payload.Id
+        ),
       };
     default:
       return state;

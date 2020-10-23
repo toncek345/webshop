@@ -1,12 +1,10 @@
-import React from 'react';
+import React from "react";
 
-import { Thumbnail, Col } from 'react-bootstrap';
+import { Thumbnail, Col } from "react-bootstrap";
 
-import { ServerIp } from '../../constants';
+import { ServerIp } from "../../constants";
 
-const Card = ({
-  imageUrl, heading, action, itemId, price,
-}) => (
+const Card = ({ imageUrl, heading, action, itemId, price }) => (
   <Col xs={12} sm={4} md={3}>
     <Thumbnail
       src={`${ServerIp}/static/${imageUrl}`}

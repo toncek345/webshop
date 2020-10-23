@@ -1,13 +1,11 @@
-import React from 'react';
-import { Route } from 'react-router-dom';
-import { connect } from 'react-redux';
+import React from "react";
+import { Route } from "react-router-dom";
+import { connect } from "react-redux";
 
 const ShopingRoute = ({ component: Component, itemsInCart, ...rest }) => (
   <Route
     {...rest}
-    render={props => (
-      <Component {...props} itemsInCart={itemsInCart} />
-    )}
+    render={(props) => <Component {...props} itemsInCart={itemsInCart} />}
   />
 );
 

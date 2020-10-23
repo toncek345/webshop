@@ -1,24 +1,24 @@
-import { ServerIp } from '../constants';
+import { ServerIp } from "../constants";
 
 export const getProducts = () => (dispatch) => {
-  dispatch({ type: 'GET_PRODUCTS_PENDING' });
+  dispatch({ type: "GET_PRODUCTS_PENDING" });
   fetch(`${ServerIp}/api/v1/product`, {
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   }).then((resp) => {
     if (resp.status < 400) {
       resp.json().then((data) => {
         dispatch({
-          type: 'GET_PRODUCTS_DONE',
+          type: "GET_PRODUCTS_DONE",
           payload: data,
         });
       });
     } else {
       dispatch({
-        type: 'GET_PRODUCTS_FAIL',
-        payload: 'Error loading products.',
+        type: "GET_PRODUCTS_FAIL",
+        payload: "Error loading products.",
       });
     }
   });
@@ -26,7 +26,7 @@ export const getProducts = () => (dispatch) => {
 
 export function increaseNumberOfItem(item, times) {
   return {
-    type: 'INCREASE_NUMBER_OF_ITEM',
+    type: "INCREASE_NUMBER_OF_ITEM",
     payload: {
       item,
       times,
@@ -36,14 +36,14 @@ export function increaseNumberOfItem(item, times) {
 
 export function addToCart(item) {
   return {
-    type: 'ADD_TO_CART',
+    type: "ADD_TO_CART",
     payload: item,
   };
 }
 
 export function removeFromCart(item) {
   return {
-    type: 'REMOVE_FROM_CART',
+    type: "REMOVE_FROM_CART",
     payload: item,
   };
 }
