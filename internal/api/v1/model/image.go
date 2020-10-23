@@ -1,4 +1,4 @@
-package models
+package model
 
 type Image struct {
 	ID        int    `db:"id"`

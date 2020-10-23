@@ -16,8 +16,11 @@ import (
 type Config struct {
 	Env Environment
 
-	StaticPath string `yaml:"static_path"`
-	WebPort    int64  `yaml:"web_port"`
+	// TODO: static and storage path are currently the same thing.
+	StaticPath      string `yaml:"static_path"`
+	DiskStoragePath string `yaml:"disk_storage_path"`
+
+	WebPort int64 `yaml:"web_port"`
 
 	Postgres struct {
 		Database string `yaml:"database"`

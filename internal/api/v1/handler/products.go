@@ -1,4 +1,4 @@
-package api
+package handler
 
 import (
 	"encoding/base64"
@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi"
 	uuid "github.com/satori/go.uuid"
 	"github.com/senko/clog"
-	"github.com/toncek345/webshop/models"
+	"github.com/toncek345/webshop/internal/api/v1/model"
 )
 
 func (app *App) productRouter(r chi.Router) {
@@ -57,7 +57,7 @@ func (app *App) createImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filename := fmt.Sprintf("product-%s.jpg", uuid.NewV4().String())
-	ioutil.WriteFile(app.staticFolderPath+filename, binaryImage, os.ModePerm)
+	ioutil.WriteFile(app.storageDirPath+filename, binaryImage, os.ModePerm)
 
 	if err := app.models.Products.InsertImages(productID, []string{filename}); err != nil {
 		clog.Warningf("%s", err)
@@ -83,7 +83,7 @@ func (app *App) deleteImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = os.Remove(app.staticFolderPath + imgKey); err != nil {
+	if err = os.Remove(app.storageDirPath + imgKey); err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return
@@ -94,8 +94,8 @@ func (app *App) deleteImage(w http.ResponseWriter, r *http.Request) {
 
 func (app *App) createProduct(w http.ResponseWriter, r *http.Request) {
 	var obj struct {
-		Product models.Product `json:"product"`
-		Images  []string       `json:"images"` // base64 encoded images
+		Product model.Product `json:"product"`
+		Images  []string      `json:"images"` // base64 encoded images
 	}
 
 	if err := app.JSONDecode(r, &obj); err != nil {
@@ -124,7 +124,7 @@ func (app *App) createProduct(w http.ResponseWriter, r *http.Request) {
 			}
 
 			filename := fmt.Sprintf("product-%s.jpg", uuid.NewV4().String())
-			ioutil.WriteFile(app.staticFolderPath+filename, data, os.ModePerm)
+			ioutil.WriteFile(app.storageDirPath+filename, data, os.ModePerm)
 			imageNames = append(imageNames, filename)
 
 			binaryImages[i] = data
@@ -190,7 +190,7 @@ func (app *App) productUpdate(w http.ResponseWriter, r *http.Request) {
 
 	if err := app.models.Products.UpdateByID(
 		id,
-		models.Product{
+		model.Product{
 			Price:       obj.Price,
 			Name:        obj.Name,
 			Description: obj.Description,

@@ -1,4 +1,5 @@
 static_path: ./static
+disk_storage_path: ./static
 web_port: 9000
 
 postgres:
