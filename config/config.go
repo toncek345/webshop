@@ -4,12 +4,18 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/go-testfixtures/testfixtures/v3"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
+	Env Environment
+
 	StaticPath string `yaml:"static_path"`
 	WebPort    int64  `yaml:"web_port"`
 
@@ -47,6 +53,8 @@ func New(env Environment) (Config, error) {
 		return cfg, fmt.Errorf("config: error unmarshalling yaml: %w", err)
 	}
 
+	cfg.Env = env
+
 	return cfg, nil
 }
 
@@ -63,4 +71,33 @@ func (cfg *Config) PGSQLConnString() string {
 
 func (cfg *Config) SqlxConn() (*sqlx.DB, error) {
 	return sqlx.Connect("postgres", cfg.PGSQLConnString())
+}
+
+func (cfg *Config) MigrationObj() (*migrate.Migrate, error) {
+	return migrate.New(
+		"file://db/migrations",
+		cfg.PGSQLConnString())
+}
+
+func (cfg *Config) Fixture() (*testfixtures.Loader, error) {
+	db, err := cfg.SqlxConn()
+	if err != nil {
+		return nil, err
+	}
+
+	return testfixtures.New(
+		testfixtures.Database(db.DB),
+		testfixtures.Dialect("postgres"),
+		testfixtures.Directory(cfg.fixturePath()),
+		testfixtures.DangerousSkipTestDatabaseCheck(),
+		testfixtures.SkipResetSequences(),
+	)
+}
+
+func (cfg *Config) fixturePath() string {
+	if cfg.Env == ProdEnv {
+		panic("no fixtures on prod env")
+	}
+
+	return "db/fixtures/dev"
 }
