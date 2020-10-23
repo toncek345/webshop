@@ -1,6 +1,8 @@
 package db
 
-import cli "github.com/urfave/cli/v2"
+import (
+	cli "github.com/urfave/cli/v2"
+)
 
 var fixture *cli.Command = &cli.Command{
 	Name:  "fixture",

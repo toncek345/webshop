@@ -13,7 +13,7 @@ import (
 
 // getAuthHeader gets auth uuid from header which is sent in x-auth.
 func (app *App) getAuthHeader(r *http.Request) string {
-	return r.Header.Get("x-auth")
+	return r.Header.Get("Authorization")
 }
 
 // JSONDecode decodes given request to object that is given.

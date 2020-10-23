@@ -5,16 +5,17 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/senko/clog"
-	"github.com/toncek345/webshop/models"
 )
 
 func (app *App) adminRouter(r chi.Router) {
 	r.Post("/user/login",
 		func(w http.ResponseWriter, r *http.Request) {
-			var obj models.User
+			var obj struct {
+				Username string `json:"username"`
+				Password string `json:"password"`
+			}
 
-			err := app.JSONDecode(r, &obj)
-			if err != nil {
+			if err := app.JSONDecode(r, &obj); err != nil {
 				clog.Warningf("%s", err)
 				app.JSONRespond(w, r, http.StatusBadRequest, err)
 				return
@@ -40,8 +41,8 @@ func (app *App) adminRouter(r chi.Router) {
 	r.Post("/user/logout",
 		func(w http.ResponseWriter, r *http.Request) {
 			token := app.getAuthHeader(r)
-			err := app.models.Auth.RemoveAuth(token)
-			if err != nil {
+			if err := app.models.Auth.RemoveAuth(token); err != nil {
+				clog.Error(err.Error())
 				app.JSONRespond(w, r, http.StatusInternalServerError, err)
 				return
 			}

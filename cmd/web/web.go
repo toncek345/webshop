@@ -79,7 +79,7 @@ func RegisterCommand(app *cli.App) {
 					WriteTimeout: 15 * time.Second,
 				}
 
-				clog.Debug("webshop running")
+				clog.Debugf("webshop running on %s", addr)
 				clog.Errorf("%v", server.ListenAndServe())
 				return nil
 			},

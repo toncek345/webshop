@@ -78,7 +78,7 @@ func (ar *authRepo) createAuth(a Authentication) error {
 		`
 		INSERT INTO authentications
 		(user_id, valid_until, token)
-		VALUES ($1, $2, $3)"
+		VALUES ($1, $2, $3)
 		`,
 		a.UserID,
 		pq.FormatTimestamp(a.ValidUntil),
@@ -91,7 +91,7 @@ func (ar *authRepo) createAuth(a Authentication) error {
 
 func (ar *authRepo) RemoveAuth(token string) error {
 	if _, err := ar.db.Exec(
-		"UPDATE authenticaions SET valid_until = now() WHERE token = $1",
+		"UPDATE authentications SET valid_until = now() WHERE token = $1",
 		token); err != nil {
 		return fmt.Errorf("models/auth: error invalidating authorization: %w", err)
 	}
