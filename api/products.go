@@ -42,7 +42,7 @@ func (app *App) createImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	productId, err := parseUrlVarsInt(r, "id")
+	productID, err := parseUrlVarsInt(r, "id")
 	if err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusBadRequest, err)
@@ -59,7 +59,7 @@ func (app *App) createImage(w http.ResponseWriter, r *http.Request) {
 	filename := fmt.Sprintf("product-%s.jpg", uuid.NewV4().String())
 	ioutil.WriteFile(app.staticFolderPath+filename, binaryImage, os.ModePerm)
 
-	if err := app.models.Products.InsertImages(productId, []string{filename}); err != nil {
+	if err := app.models.Products.InsertImages(productID, []string{filename}); err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return
@@ -69,28 +69,25 @@ func (app *App) createImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *App) deleteImage(w http.ResponseWriter, r *http.Request) {
-	imageId, err := parseUrlVarsInt(r, "id")
+	imageID, err := parseUrlVarsInt(r, "id")
 	if err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	_, err = app.models.Products.DeleteImage(imageId)
+	imgKey, err := app.models.Products.DeleteImage(imageID)
 	if err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	// TODO: Same as upper call. Discarding this in v1 since the same image can be
-	// referenced by news.
-	// err = os.Remove(app.staticFolderPath + imgName)
-	// if err != nil {
-	// 	clog.Warningf("%s", err)
-	// 	app.JSONRespond(w, r, http.StatusInternalServerError, err)
-	// 	return
-	// }
+	if err = os.Remove(app.staticFolderPath + imgKey); err != nil {
+		clog.Warningf("%s", err)
+		app.JSONRespond(w, r, http.StatusInternalServerError, err)
+		return
+	}
 
 	app.JSONRespond(w, r, http.StatusOK, nil)
 }
@@ -107,7 +104,7 @@ func (app *App) createProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	productId, err := app.models.Products.Create(obj.Product)
+	productID, err := app.models.Products.Create(obj.Product)
 	if err != nil {
 		clog.Warningf("%s", err)
 		app.JSONRespond(w, r, http.StatusInternalServerError, err)
@@ -133,7 +130,7 @@ func (app *App) createProduct(w http.ResponseWriter, r *http.Request) {
 			binaryImages[i] = data
 		}
 
-		if err := app.models.Products.InsertImages(productId, imageNames); err != nil {
+		if err := app.models.Products.InsertImages(productID, imageNames); err != nil {
 			clog.Warningf("%s", err)
 			app.JSONRespond(w, r, http.StatusInternalServerError, err)
 			return

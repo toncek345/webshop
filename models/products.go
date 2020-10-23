@@ -36,18 +36,10 @@ func (pr *productsRepo) Get() ([]Product, error) {
 		productIDs = append(productIDs, p.ID)
 	}
 
-	var images []struct {
-		ProductID int    `db:"product_id"`
-		ImageID   int    `db:"image_id"`
-		ImageKey  string `db:"image_key"`
-	}
+	var images []*Image
 	if err := pr.db.Select(
 		&images,
-		`SELECT images.id AS 'image_id', images.key AS 'image_key',
-		product_images.product_id AS 'product_id'
-		FROM images
-		JOIN product_images ON product_images.image_id = images.id
-		WHERE product_images.product_id IN ($1)`,
+		`SELECT * FROM images WHERE product_id IN ($1)`,
 		productIDs,
 	); err != nil {
 		return nil, fmt.Errorf("models/products: error getting images for products: %w", err)
@@ -56,10 +48,7 @@ func (pr *productsRepo) Get() ([]Product, error) {
 	for _, i := range images {
 		for _, p := range products {
 			if i.ProductID == p.ID {
-				p.Images = append(p.Images, &Image{
-					ID:  i.ImageID,
-					Key: i.ImageKey,
-				})
+				p.Images = append(p.Images, i)
 			}
 		}
 	}
@@ -75,9 +64,8 @@ func (pr *productsRepo) GetByID(id int) (Product, error) {
 
 	if err := pr.db.Select(
 		&p.Images,
-		`SELECT images.id, images.key FROM images
-		JOIN product_images ON product_images.image_id = images.id
-		WHERE product_images.product_id = $1`,
+		`SELECT * FROM images
+		WHERE image.product_id = $1`,
 		id); err != nil {
 		return p, fmt.Errorf("models/products: error getting images for product: %w", err)
 	}
@@ -86,7 +74,7 @@ func (pr *productsRepo) GetByID(id int) (Product, error) {
 }
 
 func (pr *productsRepo) DeleteByID(id int) error {
-	// TODO: also image is not deleted because it can be referenced by news.
+	// TODO: delete images also..
 	if _, err := pr.db.Exec("DELETE FROM products WHERE id=$1", id); err != nil {
 		return fmt.Errorf("models/products: error deleting product: %w", err)
 	}
@@ -140,15 +128,7 @@ func (pr *productsRepo) InsertImages(productID int, imageKeys []string) error {
 
 		if err := pr.db.Get(
 			&lastID,
-			`
-			DO $$
-			DECLARE
-				imageId bigint;
-			BEGIN
-				INSERT INTO images (key) VALUES ($1) RETURNING id INTO imageId;
-				INSERT INTO product_images (product_id, image_id) VALUES ($2, imageId);
-			END $$;
-			`,
+			`INSERT INTO images (key, product_id) VALUES ($1, $2) RETURNING id`,
 			key, productID); err != nil {
 			return fmt.Errorf("models/products: error inserting image: %w", err)
 		}
@@ -157,21 +137,17 @@ func (pr *productsRepo) InsertImages(productID int, imageKeys []string) error {
 	return nil
 }
 
-// TODO: this is a bit tricy because same image can be referenced by news. Discrding this
-// in v1 api :)
 func (pr *productsRepo) DeleteImage(imageID int) (string, error) {
-	// imageKey := struct {
-	// 	ImageKey string `db:"name"`
-	// }{}
+	imageKey := struct {
+		ImageKey string `db:"name"`
+	}{}
+	if err := pr.db.Get(
+		&imageKey,
+		"DELETE FROM images WHERE id = $1 RETURNING key",
+		imageID,
+	); err != nil {
+		return "", fmt.Errorf("models/products: error deleting image: %w", err)
+	}
 
-	// if err := pr.db.Get(
-	// 	&imageKey,
-	// 	"DELETE FROM images WHERE id = $1 RETURNING name",
-	// 	imageID,
-	// ); err != nil {
-	// 	return "", fmt.Errorf("models/products: error deleting image: %w", err)
-	// }
-
-	// return imageKey.ImageKey, nil
-	return "", nil
+	return imageKey.ImageKey, nil
 }

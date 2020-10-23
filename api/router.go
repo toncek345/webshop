@@ -62,7 +62,6 @@ func (app *App) Router() chi.Router {
 			w.Write([]byte("all good"))
 		})
 
-		app.newsRouter(r)
 		app.adminRouter(r)
 		app.productRouter(r)
 	})

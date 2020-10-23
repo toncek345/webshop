@@ -7,7 +7,6 @@ import (
 )
 
 type Models struct {
-	News     newsRepo
 	Products productsRepo
 	Users    usersRepo
 	Auth     authRepo
@@ -19,7 +18,6 @@ func New(sqlDB *sqlx.DB) (Models, error) {
 	}
 
 	return Models{
-		News:     newNewsRepo(sqlDB),
 		Products: newProductsRepo(sqlDB),
 		Users:    newUserRepo(sqlDB),
 		Auth:     newAuthRepo(sqlDB),
